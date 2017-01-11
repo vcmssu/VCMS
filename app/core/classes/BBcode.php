@@ -24,7 +24,29 @@ class BBcode {
         return preg_replace(array_keys($bbcode), array_values($bbcode), $text);
     }
 
+    function smiles($t) {
+        $home = Cms::setup('home');
+        $querysmiles = DB::run("SELECT * FROM `smiles` ORDER BY `id` ASC");
+        while ($rowsmiles = $querysmiles->fetch(PDO::FETCH_ASSOC)) {
+            $code[] = $rowsmiles['code'];
+            $smile_url[] = '<img src="' . $home . '/files/smiles/' . $rowsmiles['photo'] . '" alt="smile" title="' . $rowsmiles['photo'] . '" />';
+        }
+        $t = str_replace($code, $smile_url, $t);
+        return $t;
+    }
+
+    function delsmiles($t) {
+        $home = Cms::setup('home');
+        $querysmiles = DB::run("SELECT * FROM `smiles` ORDER BY `id` ASC");
+        while ($rowsmiles = $querysmiles->fetch(PDO::FETCH_ASSOC)) {
+            $code[] = $rowsmiles['code'];
+        }
+        $t = str_replace($code, '', $t);
+        return $t;
+    }
+
     function delete($text) {
+        $text = self::delsmiles($text);
         $bbcode = array(
             '/\[quote\](.*?)\[\/quote\]/s' => '',
             '/\[code](.+)\[\/code]/isU' => '',
@@ -44,17 +66,6 @@ class BBcode {
             '/[http|https]+:\/\/(?:www\.|)rutube\.ru\/tracks\/([a-zA-Z0-9_\-]+)(&.+)?/i' => '',
             '/[http|https]+:\/\/(?:www\.|)rutube\.ru\/video\/([a-zA-Z0-9_\-]+)\//i' => '');
         return preg_replace(array_keys($bbcode), array_values($bbcode), $text);
-    }
-
-    function smiles($t) {
-        $home = Cms::setup('home');
-        $querysmiles = DB::run("SELECT * FROM `smiles` ORDER BY `id` ASC");
-        while ($rowsmiles = $querysmiles->fetch(PDO::FETCH_ASSOC)) {
-            $code[] = $rowsmiles['code'];
-            $smile_url[] = '<img src="'.$home.'/files/smiles/' . $rowsmiles['photo'] . '" alt="smile" title="' . $rowsmiles['photo'] . '" />';
-        }
-        $t = str_replace($code, $smile_url, $t);
-        return $t;
     }
 
 }
