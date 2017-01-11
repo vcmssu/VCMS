@@ -774,7 +774,7 @@ class ForumModel extends Base {
 
         $count = DB::run("SELECT COUNT(*) FROM `post` WHERE `id_tema`='" . $tema['id'] . "'")->fetchColumn();
         if ($count > 0) {
-            $req = DB::run("SELECT post. * , ".User::data('post').",
+            $req = DB::run("SELECT post. * , " . User::data('post') . ",
                             (SELECT `text` FROM `post` WHERE `post`.`id` = post.`cit`) AS `textcit`,
                             (SELECT `login` FROM `users` WHERE `users`.`id` = post.`id_user_edit`) AS `login_edit`,
                             (SELECT COUNT(*) FROM `post_files` WHERE `post_files`.`id_post` = post.`id`) AS `count_file` FROM `post`
@@ -895,7 +895,7 @@ class ForumModel extends Base {
 
         $count = DB::run("SELECT COUNT(*) FROM `post` WHERE `time`>'" . intval(Cms::realtime() - Cms::setup('time_forum')) . "'$filter")->fetchColumn();
         if ($count > 0) {
-            $req = DB::run("SELECT post. * , ".User::data('post').",
+            $req = DB::run("SELECT post. * , " . User::data('post') . ",
                 (SELECT `name` FROM `tema` WHERE `tema`.`id` = post.`id_tema`) AS `nametema`,
                 (SELECT `text` FROM `post` WHERE `post`.`id` = post.`cit`) AS `textcit`,
                 (SELECT COUNT(*) FROM `post_files` WHERE `post_files`.`id_post` = post.`id`) AS `count_file` FROM `post`
@@ -972,7 +972,11 @@ class ForumModel extends Base {
     function load($id, $id2, $id3, $id4) {
         $row = DB::run("SELECT * FROM `post_files` WHERE `id`='" . $id4 . "'")->fetch(PDO::FETCH_ASSOC);
         DB::run("UPDATE `post_files` SET `loadcounts` = '" . intval($row['loadcounts'] + 1) . "', `timeload` = '" . Cms::realtime() . "' WHERE `id` = '" . $row['id'] . "'");
-        Download::load('files/user/' . $row['id_user'] . '/forum/' . $row['file']);
+        if ($row['type'] == 'png' || $row['type'] == 'jpg' || $row['type'] == 'jpeg' || $row['type'] == 'gif') {
+            Functions::redirect(Cms::setup('home').'/files/user/' . $row['id_user'] . '/forum/' . $row['file']);
+        } else {
+            Download::load('files/user/' . $row['id_user'] . '/forum/' . $row['file']);
+        }
     }
 
     function vote($id, $id2, $id3) {
@@ -1149,7 +1153,7 @@ class ForumModel extends Base {
 
         $count = DB::run("SELECT COUNT(*) FROM `tema_vote_us` WHERE `id_tema`='" . $tema['id'] . "'")->fetchColumn();
         if ($count > 0) {
-            $reqvote = DB::run("SELECT `tema_vote_us`.*, ".User::data('tema_vote_us').",
+            $reqvote = DB::run("SELECT `tema_vote_us`.*, " . User::data('tema_vote_us') . ",
                 (SELECT `name` FROM `tema_vote` WHERE `tema_vote`.`id`=`tema_vote_us`.`vote`) AS `option` FROM `tema_vote_us` WHERE `id_tema`='" . $tema['id'] . "' ORDER BY `id` DESC LIMIT " . $this->page . ", " . $this->message);
             while ($rowvote = $reqvote->fetch(PDO::FETCH_ASSOC)) {
                 $arrayrowvote[] = $rowvote;
