@@ -9,7 +9,7 @@ class NewsModel extends Base {
             $req = DB::run("SELECT `news`.*, (SELECT COUNT(1) FROM `news_comments` WHERE `news_comments`.`id_news`=`news`.`id`) AS `count` FROM `news` WHERE `status`='1' ORDER BY `id` DESC LIMIT " . $this->page . ", " . $this->message);
             while ($row = $req->fetch(PDO::FETCH_ASSOC)) {
                 $arrayrow[] = $row;
-                $text[] = Cms::bbcode($row['text']);
+                $text[] = BBcode::delete($row['text']);
             }
         }
 
@@ -41,7 +41,7 @@ class NewsModel extends Base {
 
         $count = DB::run("SELECT COUNT(*) FROM `news_comments` WHERE `id_news`='" . $row['id'] . "'")->fetchColumn();
         if ($count > 0) {
-            $req = DB::run("SELECT `news_comments`.*, ".User::data('news_comments')." FROM `news_comments` WHERE `id_news`='" . $row['id'] . "' ORDER BY `id` DESC LIMIT " . $this->page . ", " . $this->message);
+            $req = DB::run("SELECT `news_comments`.*, " . User::data('news_comments') . " FROM `news_comments` WHERE `id_news`='" . $row['id'] . "' ORDER BY `id` DESC LIMIT " . $this->page . ", " . $this->message);
             while ($rows = $req->fetch(PDO::FETCH_ASSOC)) {
                 $arrayrow[] = $rows;
                 $text[] = Cms::bbcode($rows['text']);
@@ -65,7 +65,7 @@ class NewsModel extends Base {
             $req = DB::run("SELECT `news`.*, (SELECT COUNT(1) FROM `news_comments` WHERE `news_comments`.`id_news`=`news`.`id`) AS `count` FROM `news` ORDER BY `id` DESC LIMIT " . $this->page . ", " . $this->message);
             while ($row = $req->fetch(PDO::FETCH_ASSOC)) {
                 $arrayrow[] = $row;
-                $text[] = Cms::bbcode($row['text']);
+                $text[] = BBcode::delete($row['text']);
             }
         }
 

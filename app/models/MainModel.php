@@ -3,8 +3,10 @@
 class MainModel extends Base {
 
     function index() {
+        $news = DB::run("SELECT `news`.*, (SELECT COUNT(1) FROM `news_comments` WHERE `news_comments`.`id_news`=`news`.`id`) AS `count` FROM `news` WHERE `status`='1' ORDER BY `id` DESC LIMIT 1")->fetch(PDO::FETCH_ASSOC);
         SmartySingleton::instance()->assign(array(
-            'news' => DB::run("SELECT `news`.*, (SELECT COUNT(1) FROM `news_comments` WHERE `news_comments`.`id_news`=`news`.`id`) AS `count` FROM `news` WHERE `status`='1' ORDER BY `id` DESC LIMIT 1")->fetch(PDO::FETCH_ASSOC)
+            'news' => $news,
+            'text' => BBcode::delete($news['text'])
         ));
         SmartySingleton::instance()->display(SMARTY_TEMPLATE_LOAD . '/templates/index.tpl');
     }
