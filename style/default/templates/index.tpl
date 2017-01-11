@@ -2,7 +2,7 @@
     <div class="pod">
         <div class="head"><a href="{$home}/news" class="link"><i class="fa fa-feed"></i> Новости ({$news.time|times})</a></div> 
         <div class="text">
-            <p>{$news.text|esc|truncate:220|strip_tags:false|nl2br}</p>
+            <p>{$text|esc|truncate:220|strip_tags:false|nl2br}</p>
             <a href="{$home}/news/{$news.id}-{$news.translate}">Подробнее...</a>
             {if $news.comments == 1}<a href="{$home}/news/comments/{$news.id}">Комментарии ({$news.count|number})</a>{/if}
         </div>
