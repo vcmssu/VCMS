@@ -16,7 +16,7 @@
                 {/literal}
             </style>	
         {/if}
-        <form action="{$home}" method="post" class="fon">
+        <form action="{$url}" method="post" class="fon">
             <textarea name="text" id="code" class="form-control" rows="25"/>{$template|escape}</textarea><br/>
             <input type="submit" name="ok" value="Сохранить шаблон" class="btn btn-primary"> {*<input type="submit" name="create" value="Создать резервную копию" class="btn btn-primary"> {if $backup}<input type="submit" name="reload" value="Восстановить из резервной копии" class="btn btn-primary">{/if}*}<br/><br/>
         </form>
