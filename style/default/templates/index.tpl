@@ -13,6 +13,7 @@
 <div class="pod">
     <div class="head"> Полезное</div>
     <div class="menu"><a href="{$home}/download"><i class="fa fa-download"></i> Загрузки ({$download|number}{if $downloadnew > 0} <font color="red">+{$downloadnew|number}</font>{/if})</a></div>
+    <div class="menu"><a href="{$home}/library"><i class="fa fa-file-text"></i> Библиотека ({$library|number})</a></div>
 </div>
 {if $lastthems}
     <div class="pod visible-xs visible-sm">

@@ -7,11 +7,14 @@
             <a href="{$home}/download/file/{$row.id}">Дополнительные файлы ({$count|number})</a>
         </div>
     {/if}
+    <div class="breadcrumb">
+        Добавил: <a href="{$home}/id{$row.id_user}">{$row.login}</a> | Дата: {$row.time|times} | Просмотров: {$row.views|number}
+    </div>
     {if $row.type == 'jpg' || $row.type == 'jpeg' || $row.type == 'png' || $row.type == 'gif'}
         <p><a href="{$home}/{$row.path}{$row.file}" title="{$row.name}"><img src="{$home}/{$row.path}view_{$row.file}" alt=""></a></p>
             {/if}
             {if $row.screen}
-        <p><img src="{$home}/{$row.path}{$row.screen}" alt="" /></p>
+        <p><a href="{$home}/{$row.path}{$row.screen}"><img src="{$home}/{$row.path}small_{$row.screen}" alt="" /></a></p>
         {else}
             {if $row.type == 'nth' || $row.type == 'thm'}
             <p><img src="{$home}/{$row.path}{$row.file}.GIF" alt="" /></p>
@@ -71,7 +74,6 @@
     {if !empty($text)}
         <p>{$text|escape|esc|nl2br}</p>
     {/if}			
-    <p>&nbsp;&nbsp;&nbsp;Дата добавления: {$row.time|times}</p>
     <p>&nbsp;&nbsp;&nbsp;Размер: {$row.size}</p>
     {if $row.type == 'jpg' || $row.type == 'jpeg' || $row.type == 'png' || $row.type == 'gif'}
         <p>&nbsp;&nbsp;&nbsp;Разрешение: {$Img.0} x {$Img.1} пикс.</p>
@@ -80,7 +82,6 @@
     {if !empty($row.timeload)}
         <p>&nbsp;&nbsp;&nbsp;Последний раз скачан: {$row.timeload|times}</p>
     {/if}
-    <p>&nbsp;&nbsp;&nbsp;Просмотров: {$row.views|number}</p>
     <p>&nbsp;&nbsp;&nbsp;Тип файла: {$row.type}</p>
     {*выводим инфу для видео*}
     {if $row.type == 'mp4' || $row.type == '3gp' || $row.type == 'avi' || $row.type == 'wmv'}

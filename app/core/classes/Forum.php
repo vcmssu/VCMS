@@ -72,7 +72,7 @@ class Forum {
                                     `time` = '" . Cms::realtime() . "', 
                                         `type` = '" . $forum['type'] . "'");
 
-                $postid = DB::$pdo->lastInsertId();
+                $postid = DB::lastInsertId();
 
                 Cms::antiflood(); //антифлуд
 
@@ -110,25 +110,27 @@ class Forum {
                 DB::run("UPDATE `tema` SET
                         `id_user_last` = '" . $this->user['id'] . "',
                             `id_post_last` = '" . $postid . "',
-                                `countpost` = '" . intval($tema['countpost'] + 1) . "',
+                                `countpost` = '" . Cms::Int($tema['countpost'] + 1) . "',
                                     `time` = '" . Cms::realtime() . "' WHERE `id` = '" . $tema['id'] . "'");
 
                 //обновляем кол-во постов у пользователя
-                DB::run("UPDATE `users` SET `countpost` = '" . intval($this->user['countpost'] + 1) . "' WHERE `id` = '" . $this->user['id'] . "'");
+                DB::run("UPDATE `users` SET `countpost` = '" . Cms::Int($this->user['countpost'] + 1) . "' WHERE `id` = '" . $this->user['id'] . "'");
 
                 //обновляем кол-во постов у форума, подфорума
-                DB::run("UPDATE `forum` SET `countpost` = '" . intval($razdel['countpost'] + 1) . "' WHERE `id` = '" . $razdel['id'] . "'");
-                DB::run("UPDATE `forum` SET `countpost` = '" . intval($forum['countpost'] + 1) . "' WHERE `id` = '" . $forum['id'] . "'");
+                DB::run("UPDATE `forum` SET `countpost` = '" . Cms::Int($razdel['countpost'] + 1) . "' WHERE `id` = '" . $razdel['id'] . "'");
+                DB::run("UPDATE `forum` SET `countpost` = '" . Cms::Int($forum['countpost'] + 1) . "' WHERE `id` = '" . $forum['id'] . "'");
 
                 $count = DB::run("SELECT COUNT(*) FROM `post` WHERE `id_tema`=" . $tema['id'] . "")->fetchColumn();
                 $starts = max(0, (int) $count - (((int) $count % (int) $this->message) == 0 ? $this->message : ((int) $count % (int) $this->message)));
+                
+                Cms::addballs(Cms::setup('balls_add_post'));//прибавляем баллы
 
                 /* уведомляем */
                 if ($_POST['reply'] == 1) {
-                    Cms::notice($post['id_user'], User::$user['id'], 'Ответил на Ваше сообщение: ' . $_POST['text'] . ' [b]в теме [url=' . Cms::setup('home') . '/forum/' . $razdel['id'] . '/' . $forum['id'] . '/' . $tema['id'] . ']' . Functions::esc($tema['name']) . '[/url][/b]');
+                    Cms::notice($post['id_user'], User::$user['id'], 'Ответил на Ваше сообщение: ' . $_POST['text'] . ' [b]в теме [url=' . Cms::setup('home') . '/forum/' . $razdel['id'] . '/' . $forum['id'] . '/' . $tema['id'] . '/post/'.$postid.']' . Functions::esc($tema['name']) . '[/url][/b]');
                 }
                 if ($_POST['quote'] == 1) {
-                    Cms::notice($post['id_user'], User::$user['id'], 'Процитировал Ваше сообщение: ' . $_POST['text'] . ' [b]в теме [url=' . Cms::setup('home') . '/forum/' . $razdel['id'] . '/' . $forum['id'] . '/' . $tema['id'] . ']' . Functions::esc($tema['name']) . '[/url][/b]');
+                    Cms::notice($post['id_user'], User::$user['id'], 'Процитировал Ваше сообщение: ' . $_POST['text'] . ' [b]в теме [url=' . Cms::setup('home') . '/forum/' . $razdel['id'] . '/' . $forum['id'] . '/' . $tema['id'] . '/post/'.$postid.']' . Functions::esc($tema['name']) . '[/url][/b]');
                 }
                 Functions::redirect(Cms::setup('home') . '/forum/' . $razdel['id'] . '/' . $forum['id'] . '/' . $tema['id'] . '?page=' . $starts . '#' . $postid);
             }

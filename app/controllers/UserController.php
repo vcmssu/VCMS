@@ -45,6 +45,12 @@ class UserController {
         $this->model->users();
         Cms::footer();
     }
+    
+    function users_admin() {
+        Cms::header('Администрация сайта');
+        $this->model->users_admin();
+        Cms::footer();
+    }
 
     function ban() {
         if (User::$user['ban'] == 0 || User::$user['bantime'] < Cms::realtime()) {

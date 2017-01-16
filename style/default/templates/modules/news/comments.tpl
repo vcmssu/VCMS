@@ -2,17 +2,20 @@
     <a href="{$home}/news">Новости</a> / <a href="{$home}/news/{$row.id}-{$row.translate}">{$row.name|esc}</a> / 
     {$title}
 </div>
-{if $user.level > 29}
-    <div class="breadcrumb">
-        <a href="{$home}/news/edit/{$row.id}">Редактировать</a> / 
-        {if $user.level > 30}
-            <a href="{$home}/news/del/{$row.id}">Удалить</a> / 
-        {/if}
-        <a href="{$home}/news/all">Все новости</a> / 
-        <a href="{$home}/news/add">Добавить новость</a>
-    </div>
-{/if}
 <div class="fon">
+    {if $user.level > 29}
+        <div class="breadcrumb">
+            <a href="{$home}/news/edit/{$row.id}">Редактировать</a> / 
+            {if $user.level > 30}
+                <a href="{$home}/news/del/{$row.id}">Удалить</a> / 
+            {/if}
+            {if $user.level > 40}
+                <a href="{$home}/news/mail/{$row.id}">Произвести рассылку</a> / 
+            {/if}
+            <a href="{$home}/news/all">Все новости</a> / 
+            <a href="{$home}/news/add">Добавить новость</a>
+        </div>
+    {/if}
     {if $user.id}
         {if isset($error)}<div class="alert alert-danger">{$error}</div>{/if}
         {if $row.comments == 1}

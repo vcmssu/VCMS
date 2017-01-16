@@ -1,6 +1,7 @@
 <div class="head"><a href="{$home}/profile">Мой кабинет</a> / {$title}</div>
 <div class="fon">
     {if $count > 0}
+        <div class="breadcrumb"><a href="{$url}/clear">Очистить</a></div>
         {foreach from=$arrayrow item=row key=k}
             <div class="list" id="{$row.id}">
                 <a href="{$home}/id{$row.user_id}">{$row.login|esc}</a>, {$row.time|times}

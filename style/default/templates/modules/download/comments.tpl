@@ -40,4 +40,4 @@
         <div class="paging_bootstrap pagination">{$pagenav}</div>
     {/if} 
 </div>
-<div class="menu"><a href="{$home}/download/{$row.id}-{$row.translate}"><i class="fa fa-angle-left"></i> К файлу {$row.name|esc}</a></div> 
+<div class="menu"><a href="{$home}/download/{$row.id}-{$row.translate}"><i class="fa fa-angle-left"></i> К файлу {$row.name|escape|esc}</a></div> 

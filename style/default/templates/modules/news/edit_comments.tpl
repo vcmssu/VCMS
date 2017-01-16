@@ -2,11 +2,11 @@
     <a href="{$home}/news">Новости</a> / <a href="{$home}/news/{$row.id}-{$row.translate}">{$row.name|esc}</a> / 
     {$title}  
 </div>
-<div class="breadcrumb">
-    <a href="{$home}/news/all">Все новости</a> / 
-    <a href="{$home}/news/add">Добавить новость</a>
-</div>
 <div class="fon">
+    <div class="breadcrumb">
+        <a href="{$home}/news/all">Все новости</a> / 
+        <a href="{$home}/news/add">Добавить новость</a>
+    </div>
     {if isset($error)}<div class="alert alert-danger">{$error}</div>{/if}
     <form action="{$url}" method="post" class="fon">
         <p>Текст сообщения: <br/>

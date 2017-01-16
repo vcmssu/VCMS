@@ -6,9 +6,11 @@
         <p><label><input type="checkbox" name="captcha_comments_news" value="1"{if $setup.captcha_comments_news == 1} checked="check"{/if}/> Каптча при добавлении комментария к новости</label></p>
         <p><label><input type="checkbox" name="captcha_comments_file" value="1"{if $setup.captcha_comments_file == 1} checked="check"{/if}/> Каптча при добавлении комментария к файлу</label></p>
         <p><label><input type="checkbox" name="captcha_comments_blog" value="1"{if $setup.captcha_comments_blog == 1} checked="check"{/if}/> Каптча при добавлении комментария к посту в блоге</label></p>
+        <p><label><input type="checkbox" name="captcha_comments_library" value="1"{if $setup.captcha_comments_library == 1} checked="check"{/if}/> Каптча при добавлении комментария к статье в библиотеке</label></p>
         {if $highlight|file_get_contents}<p><label><input type="checkbox" name="highlight" value="1"{if $setup.highlight == 1} checked="check"{/if}/> Подсветка кода в редакторе шаблонов</label></p>{/if}
         <p><font color="red">*</font><label>Максимальное ко-во отображаемых рекламных ссылок:</label> <br/> <input type="text" class="form-control" name="adslimit" value="{$setup.adslimit|esc}" required/></p>
         <p><font color="red">*</font><label>Размер превьюшки в фотогалерее, в пикселях (создаётся с сохранением пропорций):</label> <br/> <input type="text" class="form-control" name="gallerypreview" value="{$setup.gallerypreview|esc}" required/></p>
+        <p><font color="red">*</font><label>Кол-во символов для постраничной навигации в библиотеке и блогах:</label> <br/> <input type="text" class="form-control" name="count_txt" value="{$setup.count_txt|esc}" required/></p>
         <h3>Настройки каптчи</h3>
         <p><font color="red">*</font><label>Ширина:</label> <br/> <input type="text" class="form-control" name="captcha_width" value="{$setup.captcha_width|esc}" required/></p>
         <p><font color="red">*</font><label>Высота:</label> <br/> <input type="text" class="form-control" name="captcha_height" value="{$setup.captcha_height|esc}" required/></p>

@@ -41,7 +41,7 @@ class BlogsModel extends Base {
     }
 
     function search($search) {
-        $search = $search ? $search : Cms::Input(trim($_POST['search']));
+        $search = $search ? $search : Cms::Input($_POST['search']);
         if (empty($search) && isset($_POST['ok'])) {
             $error = 'Задан пустой поисковый запрос!';
         }
@@ -116,7 +116,7 @@ class BlogsModel extends Base {
                                 `keywords`='" . Cms::Input($_POST['keywords']) . "', 
                                     `description`='" . Cms::Input($_POST['description']) . "'");
 
-                $fid = DB::$pdo->lastInsertId();
+                $fid = DB::lastInsertId();
 
                 DB::run("UPDATE `blog_category` SET `realid`='" . $fid . "' WHERE `id`='" . $fid . "'");
 
@@ -261,10 +261,52 @@ class BlogsModel extends Base {
 
         Cms::addviews('blog', $row); //подсчет кол-ва просмотров
 
+        $strrpos = mb_strrpos($row['text'], " ");
+        $pages = 1;
+        if (isset($this->page)) {
+            $page = abs(intval($this->page));
+            if ($page == 0) {
+                $page = 1;
+            }
+            $start = $page - 1;
+        } else {
+            $page = $start + 1;
+        }
+        $t_si = 0;
+        if ($strrpos) {
+            while ($t_si < $strrpos) {
+                $string = mb_substr($row['text'], $t_si, Cms::setup('count_txt'));
+                $t_ki = mb_strrpos($string, " ");
+                $m_sim = $t_ki;
+                $strings[$pages] = $string;
+                $t_si = $t_ki + $t_si;
+                if ($page == $pages) {
+                    $page_text = $strings[$pages];
+                }
+                if ($strings[$pages] == "") {
+                    $t_si = $strrpos++;
+                } else {
+                    $pages++;
+                }
+            }
+            if ($page >= $pages) {
+                $page = $pages - 1;
+                $page_text = $strings[$page];
+            }
+            $pages = $pages - 1;
+            if ($page != $pages) {
+                $prb = mb_strrpos($page_text, " ");
+                $page_text = mb_substr($page_text, 0, $prb);
+            }
+        } else {
+            $page_text = $row['text'];
+        }
+
         SmartySingleton::instance()->assign(array(
             'row' => $row,
-            'count' => $count_pages,
-            'text' => Cms::bbcode($row['text'])
+            'count' => $pages,
+            'text' => Cms::bbcode($page_text),
+            'pagenav' => Functions::pagination_text($pages, $page, Cms::setup('home') . '/blogs/' . $row['refid'] . '/' . $row['id'] . '-' . $row['translate'] . '?')
         ));
         SmartySingleton::instance()->display(SMARTY_TEMPLATE_LOAD . '/templates/modules/blogs/post.tpl');
     }
@@ -286,9 +328,9 @@ class BlogsModel extends Base {
             }
 
             if (!isset($error)) {
-                $category = DB::run("SELECT * FROM `blog_category` WHERE `id`='" . intval($_POST['refid']) . "'")->fetch(PDO::FETCH_ASSOC);
+                $category = DB::run("SELECT * FROM `blog_category` WHERE `id`='" . Cms::Int($_POST['refid']) . "'")->fetch(PDO::FETCH_ASSOC);
                 DB::run("UPDATE `blog` SET 
-                        `refid`='" . intval($_POST['refid']) . "',
+                        `refid`='" . Cms::Int($_POST['refid']) . "',
                             `name`='" . Cms::Input($_POST['name']) . "', 
                                 `translate` = '" . Functions::name_replace(Cms::Input($_POST['name'])) . "', 
                                     `text`='" . Cms::Input($_POST['text']) . "',
@@ -297,7 +339,7 @@ class BlogsModel extends Base {
 
                 if ($row['refid'] != $_POST['refid']) {
                     DB::run("UPDATE `blog_comments` SET 
-                              `refid`='" . intval($_POST['refid']) . "' WHERE `id_post`='" . $row['id'] . "'");
+                              `refid`='" . Cms::Int($_POST['refid']) . "' WHERE `id_post`='" . $row['id'] . "'");
                 }
 
                 if (Cms::setup('adminlogs') == 1) {
@@ -347,7 +389,7 @@ class BlogsModel extends Base {
 
         $count = DB::run("SELECT COUNT(*) FROM `blog_comments` WHERE `id_post`='" . $row['id'] . "'")->fetchColumn();
         if ($count > 0) {
-            $req = DB::run("SELECT `blog_comments`.*, ".User::data('blog_comments')." FROM `blog_comments` WHERE `id_post`='" . $row['id'] . "' ORDER BY `id` DESC LIMIT " . $this->page . ", " . $this->message);
+            $req = DB::run("SELECT `blog_comments`.*, " . User::data('blog_comments') . " FROM `blog_comments` WHERE `id_post`='" . $row['id'] . "' ORDER BY `id` DESC LIMIT " . $this->page . ", " . $this->message);
             while ($rows = $req->fetch(PDO::FETCH_ASSOC)) {
                 $arrayrow[] = $rows;
                 $text[] = Cms::bbcode($rows['text']);

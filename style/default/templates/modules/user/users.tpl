@@ -1,4 +1,4 @@
-<div class="head">{$title}</div>
+<div class="head">{$title} / <a href="{$home}/users/admin">Администрация сайта</a></div>
 <div class="fon">
     {if $count > 0}
         {foreach from=$arrayrow item=rows}

@@ -181,13 +181,13 @@ class ForumController {
     }
 
     function post_setup($id) {
-        if (User::$user['level'] < 30) {
-            Functions::redirect(Cms::setup('home'));
-        }
         if (DB::run("SELECT COUNT(*) FROM `post` WHERE `id`='" . $id . "'")->fetchColumn() == 0) {
             Functions::redirect(Cms::setup('home'));
         }
         $row = DB::run("SELECT * FROM `post` WHERE `id`='" . $id . "'")->fetch(PDO::FETCH_ASSOC);
+        if (User::$user['level'] < 30 && User::$user['id'] != $row['id_user'] || User::$user['level'] < 30 && $row['time'] < intval(Cms::realtime() - Cms::setup('forum_time_edit_post') * 60)) {
+            Functions::redirect(Cms::setup('home'));
+        }
         Cms::header('Редактирование сообщения');
         $this->model->post_setup($id);
         Cms::footer();
@@ -253,6 +253,24 @@ class ForumController {
         }
         Cms::header('Цитирование сообщения');
         $this->model->post_quote($id, $id2, $id3, $id4);
+        Cms::footer();
+    }
+
+    function post($id, $id2, $id3, $id4) {
+        if (DB::run("SELECT COUNT(*) FROM `forum` WHERE `id`='" . $id . "'")->fetchColumn() == 0) {
+            Functions::redirect(Cms::setup('home'));
+        }
+        if (DB::run("SELECT COUNT(*) FROM `forum` WHERE `id`='" . $id2 . "'")->fetchColumn() == 0) {
+            Functions::redirect(Cms::setup('home'));
+        }
+        if (DB::run("SELECT COUNT(*) FROM `tema` WHERE `id`='" . $id3 . "' AND `closed`='0'")->fetchColumn() == 0) {
+            Functions::redirect(Cms::setup('home'));
+        }
+        if (DB::run("SELECT COUNT(*) FROM `post` WHERE `id`='" . $id4 . "'")->fetchColumn() == 0) {
+            Functions::redirect(Cms::setup('home'));
+        }
+        Cms::header('Просмотр поста');
+        $this->model->post($id, $id2, $id3, $id4);
         Cms::footer();
     }
 

@@ -14,8 +14,7 @@ class MainModel extends Base {
     function online() {
         $count = DB::run("SELECT COUNT(*) FROM `online` WHERE `type`='1'")->fetchColumn();
         if ($count > 0) {
-            $req = DB::run("SELECT `online`.*, (SELECT `login` FROM `users` WHERE `users`.`id`=`online`.`id_user`) AS `login`,
-                (SELECT `avatar` FROM `users` WHERE `users`.`id`=`online`.`id_user`) AS `avatar` FROM `online` WHERE `type`='1' ORDER BY `time` DESC LIMIT " . $this->page . ", " . $this->message);
+            $req = DB::run("SELECT `online`.*, ".User::data('online')." FROM `online` WHERE `type`='1' ORDER BY `time` DESC LIMIT " . $this->page . ", " . $this->message);
             while ($row = $req->fetch(PDO::FETCH_ASSOC)) {
                 $arrayrow[] = $row;
             }

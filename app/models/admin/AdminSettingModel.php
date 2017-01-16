@@ -49,18 +49,20 @@ class AdminSettingModel extends Base {
     function other() {
 
         if (isset($_POST['submit'])) {
-            DB::run("UPDATE `setting` SET `value` = '" . Cms::Input($_POST['guest']) . "' WHERE `name`='guest'");
-            DB::run("UPDATE `setting` SET `value` = '" . Cms::Input($_POST['captcha_comments_news']) . "' WHERE `name`='captcha_comments_news'");
-            DB::run("UPDATE `setting` SET `value` = '" . Cms::Input($_POST['captcha_comments_file']) . "' WHERE `name`='captcha_comments_file'");
-            DB::run("UPDATE `setting` SET `value` = '" . Cms::Input($_POST['captcha_comments_blog']) . "' WHERE `name`='captcha_comments_blog'");
-            DB::run("UPDATE `setting` SET `value` = '" . Cms::Input($_POST['highlight']) . "' WHERE `name`='highlight'");
-            DB::run("UPDATE `setting` SET `value` = '" . Cms::Input($_POST['adslimit']) . "' WHERE `name`='adslimit'");
-            DB::run("UPDATE `setting` SET `value` = '" . Cms::Input($_POST['gallerypreview']) . "' WHERE `name`='gallerypreview'");
-            DB::run("UPDATE `setting` SET `value` = '" . Cms::Input($_POST['captcha_width']) . "' WHERE `name`='captcha_width'");
-            DB::run("UPDATE `setting` SET `value` = '" . Cms::Input($_POST['captcha_height']) . "' WHERE `name`='captcha_height'");
-            DB::run("UPDATE `setting` SET `value` = '" . Cms::Input($_POST['captcha_font_size']) . "' WHERE `name`='captcha_font_size'");
-            DB::run("UPDATE `setting` SET `value` = '" . Cms::Input($_POST['captcha_let_amount']) . "' WHERE `name`='captcha_let_amount'");
-            DB::run("UPDATE `setting` SET `value` = '" . Cms::Input($_POST['captcha_let_amount_fon']) . "' WHERE `name`='captcha_let_amount_fon'");
+            DB::run("UPDATE `setting` SET `value` = '" . Cms::Int($_POST['guest']) . "' WHERE `name`='guest'");
+            DB::run("UPDATE `setting` SET `value` = '" . Cms::Int($_POST['captcha_comments_news']) . "' WHERE `name`='captcha_comments_news'");
+            DB::run("UPDATE `setting` SET `value` = '" . Cms::Int($_POST['captcha_comments_file']) . "' WHERE `name`='captcha_comments_file'");
+            DB::run("UPDATE `setting` SET `value` = '" . Cms::Int($_POST['captcha_comments_blog']) . "' WHERE `name`='captcha_comments_blog'");
+            DB::run("UPDATE `setting` SET `value` = '" . Cms::Int($_POST['captcha_comments_library']) . "' WHERE `name`='captcha_comments_library'");
+            DB::run("UPDATE `setting` SET `value` = '" . Cms::Int($_POST['highlight']) . "' WHERE `name`='highlight'");
+            DB::run("UPDATE `setting` SET `value` = '" . Cms::Int($_POST['adslimit']) . "' WHERE `name`='adslimit'");
+            DB::run("UPDATE `setting` SET `value` = '" . Cms::Int($_POST['gallerypreview']) . "' WHERE `name`='gallerypreview'");
+            DB::run("UPDATE `setting` SET `value` = '" . Cms::Int($_POST['count_txt']) . "' WHERE `name`='count_txt'");
+            DB::run("UPDATE `setting` SET `value` = '" . Cms::Int($_POST['captcha_width']) . "' WHERE `name`='captcha_width'");
+            DB::run("UPDATE `setting` SET `value` = '" . Cms::Int($_POST['captcha_height']) . "' WHERE `name`='captcha_height'");
+            DB::run("UPDATE `setting` SET `value` = '" . Cms::Int($_POST['captcha_font_size']) . "' WHERE `name`='captcha_font_size'");
+            DB::run("UPDATE `setting` SET `value` = '" . Cms::Int($_POST['captcha_let_amount']) . "' WHERE `name`='captcha_let_amount'");
+            DB::run("UPDATE `setting` SET `value` = '" . Cms::Int($_POST['captcha_let_amount_fon']) . "' WHERE `name`='captcha_let_amount_fon'");
 
             if (Cms::setup('adminlogs') == 1) {
                 Cms::adminlogs('Настройки сайта', 'Изменены Дополнительные настройки');
@@ -114,6 +116,7 @@ class AdminSettingModel extends Base {
             DB::run("UPDATE `setting` SET `value` = '" . $_POST['captcha_add_theme'] . "' WHERE `name`='captcha_add_theme'");
             DB::run("UPDATE `setting` SET `value` = '" . $_POST['captcha_add_post'] . "' WHERE `name`='captcha_add_post'");
             DB::run("UPDATE `setting` SET `value` = '" . $_POST['lastthems'] . "' WHERE `name`='lastthems'");
+            DB::run("UPDATE `setting` SET `value` = '" . $_POST['forum_time_edit_post'] . "' WHERE `name`='forum_time_edit_post'");
 
             if (Cms::setup('adminlogs') == 1) {
                 Cms::adminlogs('Настройки сайта', 'Изменены настройки форума');

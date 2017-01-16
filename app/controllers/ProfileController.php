@@ -76,6 +76,12 @@ class ProfileController {
         $this->model->notice();
         Cms::footer();
     }
+    
+    function notice_clear() {
+        Cms::header('Уведомления');
+        $this->model->notice_clear();
+        Cms::footer();
+    }
 
     function bookmark_add() {
         Cms::header('Добавление в закладки');
@@ -271,6 +277,38 @@ class ProfileController {
         $row = DB::run("SELECT * FROM `gallery_photo` WHERE `id`='" . $id . "'")->fetch(PDO::FETCH_ASSOC);
         Cms::header('Удаление фотографии ' . Functions::esc($row['name']));
         $this->model->gallery_del($id);
+        Cms::footer();
+    }
+
+    function library() {
+        Cms::header('Статьи');
+        $this->model->library();
+        Cms::footer();
+    }
+
+    function library_edit($id) {
+        if (DB::run("SELECT COUNT(*) FROM `library` WHERE `id`='" . $id . "' AND `id_user`='" . User::$user['id'] . "'")->fetchColumn() == 0) {
+            Functions::redirect('/profile');
+        }
+        $row = DB::run("SELECT * FROM `library` WHERE `id`='" . $id . "'")->fetch(PDO::FETCH_ASSOC);
+        Cms::header('Редактирование статьи ' . Functions::esc($row['name']));
+        $this->model->library_edit($id);
+        Cms::footer();
+    }
+
+    function library_del($id) {
+        if (DB::run("SELECT COUNT(*) FROM `library` WHERE `id`='" . $id . "' AND `id_user`='" . User::$user['id'] . "'")->fetchColumn() == 0) {
+            Functions::redirect('/profile');
+        }
+        $row = DB::run("SELECT * FROM `library` WHERE `id`='" . $id . "'")->fetch(PDO::FETCH_ASSOC);
+        Cms::header('Удаление статьи ' . Functions::esc($row['name']));
+        $this->model->library_del($id);
+        Cms::footer();
+    }
+
+    function files() {
+        Cms::header('Файлы');
+        $this->model->files();
         Cms::footer();
     }
 

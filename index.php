@@ -1,9 +1,5 @@
 <?php
 
-if (is_file('install/index.php')) {
-    header('Location: install/index.php');
-}
-
 ini_set('display_errors', '1');
 error_reporting(E_ERROR);
 

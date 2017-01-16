@@ -22,6 +22,21 @@ class AdminlogsModel extends Base {
         SmartySingleton::instance()->display(SMARTY_TEMPLATE_LOAD . '/templates/admin/logs.tpl');
     }
 
+    function clear() {
+        if ($_POST['ok']) {
+            DB::run("TRUNCATE TABLE `adminlogs`");
+            if (Cms::setup('adminlogs') == 1) {
+                Cms::adminlogs('Логи', 'Очистил логи администрации');
+            } //пишем лог админа, если включено
+            Functions::redirect(Cms::setup('adminpanel') . '/logs');
+        }
+
+        if ($_POST['close']) {
+            Functions::redirect(Cms::setup('adminpanel') . '/logs');
+        }
+        SmartySingleton::instance()->display(SMARTY_TEMPLATE_LOAD . '/templates/admin/clear.tpl');
+    }
+
     function notice() {
         //список
         $count = DB::run("SELECT COUNT(*) FROM `notice`")->fetchColumn();

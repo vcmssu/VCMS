@@ -1,4 +1,4 @@
-<div class="head"><a href="{$home}/blogs">Блоги</a> / <a href="{$home}/blogs/{$row.refid}">{$row.namecat|esc|escape}</a> / {$title}</div>
+<div class="head"><a href="{$home}/blogs">Блоги</a> / <a href="{$home}/blogs/{$row.refid}">{$row.namecat|escape|esc}</a> / {$title}</div>
 <div class="fon">
     {if $user.level > 30}
         <div class="breadcrumb">
@@ -15,7 +15,7 @@
         </div>  
     {/if}
     <div class="breadcrumb">
-        Автор: <a href="{$home}/id{$row.id_user}">{$row.login|esc|escape}</a> | Дата: {$row.time|times} | Просмотров: {$row.views|number}
+        Автор: <a href="{$home}/id{$row.id_user}">{$row.login|escape|esc}</a> | Дата: {$row.time|times} | Просмотров: {$row.views|number}
     </div>
     <h1>{$title}</h1>
     {$text|escape|esc|nl2br}

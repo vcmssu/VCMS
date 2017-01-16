@@ -327,3 +327,8 @@ blockquote.pull-right .small:after {
     color: white;
     margin-left: 10px;
 }
+
+.img-mini{
+    width:25%;
+    height:25%;
+}

@@ -18,6 +18,9 @@
                             {if $user.level > 30}
                             <a href="{$home}/news/del/{$rows.id}" title="Удалить"><i class="fa fa-trash-o"></i></a>
                             {/if}
+                            {if $user.level > 40}
+                            <a href="{$home}/news/mail/{$rows.id}" title="Произвести рассылку"><i class="fa fa-envelope-o"></i></a>
+                            {/if}
                     </span>
                 {/if}
             </div>

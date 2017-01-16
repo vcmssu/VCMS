@@ -1,5 +1,6 @@
 <div class="head"><a href="{$home}{$panel}">Административная панель</a> / {$title}</div>
 <div class="fon">  
+    <div class="breadcrumb"><a href="{$home}{$panel}/logs/clear">Очистить логи</a></div>
     {if $count > 0}
         {*постраничка*} 
         {if $count > $message}<div class="paging_bootstrap pagination">{$pagenav}</div><br/>{/if}

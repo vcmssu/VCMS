@@ -7,7 +7,7 @@
         {if $count > 0}
             {foreach from=$arrayrow item=rows}
                 <div class="list">
-                    <img src="{$home}/files/user/{$rows.id_user}/gallery/{$rows.id_gallery}/small-{$rows.photo}" alt="" title="{$rows.name|escape|esc}"/>
+                    <img src="{$home}/files/user/{$rows.id_user}/gallery/{$rows.id_gallery}/small-{$rows.photo}" alt="" class="img-responsive" title="{$rows.name|escape|esc}"/>
                     <h4><a href="{$home}/gallery/{$rows.id_gallery}/{$rows.id}">{$rows.name|escape|esc}</a></h4>
                     <p>
                         <strong>Альбом:</strong> <a href="{$home}/gallery/{$rows.id_gallery}">{$rows.namealbum|escape|esc}</a><br/>

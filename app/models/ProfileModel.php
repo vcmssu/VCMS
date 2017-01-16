@@ -13,7 +13,9 @@ class ProfileModel extends Base {
             'friends' => DB::run("SELECT COUNT(*) FROM `friends` WHERE `id_user`='" . $this->user['id'] . "' OR `user_id`='" . $this->user['id'] . "'")->fetchColumn(),
             'friendsnew' => DB::run("SELECT COUNT(*) FROM `friends` WHERE `user_id`='" . $this->user['id'] . "' AND `status`='0'")->fetchColumn(),
             'gallery_user' => DB::run("SELECT COUNT(*) FROM `gallery` WHERE `id_user`='" . $this->user['id'] . "'")->fetchColumn(),
-            'gallery_photo_user' => DB::run("SELECT COUNT(*) FROM `gallery_photo` WHERE `id_user`='" . $this->user['id'] . "'")->fetchColumn()
+            'gallery_photo_user' => DB::run("SELECT COUNT(*) FROM `gallery_photo` WHERE `id_user`='" . $this->user['id'] . "'")->fetchColumn(),
+            'files_user' => DB::run("SELECT COUNT(*) FROM `files` WHERE `id_user`='" . $this->user['id'] . "'")->fetchColumn(),
+            'library_user' => DB::run("SELECT COUNT(*) FROM `library` WHERE `id_user`='" . $this->user['id'] . "'")->fetchColumn()
         ));
         SmartySingleton::instance()->display(SMARTY_TEMPLATE_LOAD . '/templates/modules/profile/index.tpl');
     }
@@ -63,7 +65,7 @@ class ProfileModel extends Base {
             }
 
             //ограничение на отправку сообщений
-            if (DB::run("SELECT COUNT(*) FROM `antiflood` WHERE `ip`='" . Recipe::getClientIP() . "' AND `time` > '" . intval(Cms::realtime() - Cms::setup('antiflood')) . "'")->fetchColumn() > 0) {
+            if (DB::run("SELECT COUNT(*) FROM `antiflood` WHERE `ip`='" . Recipe::getClientIP() . "' AND `time` > '" . Cms::Int(Cms::realtime() - Cms::setup('antiflood')) . "'")->fetchColumn() > 0) {
                 $error .= 'Вы не можете отправлять сообщения чаще 1 раза в ' . ending_second(Cms::setup('antiflood')) . '! Пожалуйста, немного подождите...<br/>';
             }
 
@@ -120,7 +122,8 @@ class ProfileModel extends Base {
                                 `text`='" . Cms::Input($_POST['text']) . "',
                                     `time`='" . Cms::realtime() . "'");
 
-                $fid = DB::$pdo->lastInsertId();
+                $fid = DB::lastInsertId();
+                ;
 
                 Cms::antiflood(); //антифлуд
 
@@ -159,7 +162,7 @@ class ProfileModel extends Base {
         $count = DB::run("SELECT COUNT(*) FROM `mail` WHERE `id_user`= '" . $this->user['id'] . "' AND `user_id`= '" . $row['id'] . "' OR `id_user`= '" . $row['id'] . "' AND `user_id`= '" . $this->user['id'] . "'")->fetchColumn();
         if ($count) {
             $req = DB::run("SELECT mail.*, (SELECT COUNT(*) FROM `mail_files` WHERE `mail_files`.`id_mail` = mail.`id`) AS `count_file`,
-                    " . User::data('mail') . " FROM `mail` mail WHERE mail.`id_user`= '" . $this->user['id'] . "' AND mail.`user_id`= '" . $row['id'] . "' OR mail.`id_user`= '" . $row['id'] . "' AND mail.`user_id`= '" . $this->user['id'] . "' ORDER BY mail.`id` DESC LIMIT " . $this->page . ", " . $this->message);
+                    " . User::data('mail') . " FROM `mail` WHERE mail.`id_user`= '" . $this->user['id'] . "' AND mail.`user_id`= '" . $row['id'] . "' OR mail.`id_user`= '" . $row['id'] . "' AND mail.`user_id`= '" . $this->user['id'] . "' ORDER BY mail.`id` DESC LIMIT " . $this->page . ", " . $this->message);
             while ($rows = $req->fetch(PDO::FETCH_ASSOC)) {
                 $arrayrow[] = $rows;
                 $text[] = Cms::bbcode($rows['text']);
@@ -185,7 +188,7 @@ class ProfileModel extends Base {
 
     function mail_load($id) {
         $row = DB::run("SELECT * FROM `mail_files` WHERE `id`='" . $id . "'")->fetch(PDO::FETCH_ASSOC);
-        DB::run("UPDATE `mail_files` SET `loadcounts` = '" . intval($row['loadcounts'] + 1) . "', `timeload` = '" . Cms::realtime() . "' WHERE `id` = '" . $row['id'] . "'");
+        DB::run("UPDATE `mail_files` SET `loadcounts` = '" . Cms::Int($row['loadcounts'] + 1) . "', `timeload` = '" . Cms::realtime() . "' WHERE `id` = '" . $row['id'] . "'");
         Download::load('files/user/' . $row['id_user'] . '/files/' . $row['file']);
     }
 
@@ -318,9 +321,9 @@ class ProfileModel extends Base {
 
             if (!isset($error)) {
                 DB::run("UPDATE `users` SET 
-                `news_send`='" . intval(Cms::Input($_POST['news_send'])) . "', 
+                `news_send`='" . Cms::Int(Cms::Input($_POST['news_send'])) . "', 
                     `skin` = '" . Cms::Input($_POST['skin']) . "', 
-                       `message`='" . intval(Cms::Input($_POST['message'])) . "', 
+                       `message`='" . Cms::Int(Cms::Input($_POST['message'])) . "', 
                            `timezone`='" . Cms::Input($_POST['timezone']) . "' WHERE `id`='" . $this->user['id'] . "'");
 
                 Functions::redirect(Cms::setup('home') . '/profile/setup');
@@ -527,6 +530,18 @@ class ProfileModel extends Base {
         SmartySingleton::instance()->display(SMARTY_TEMPLATE_LOAD . '/templates/modules/profile/notice.tpl');
     }
 
+    function notice_clear() {
+        if ($_POST['ok']) {
+            DB::run("DELETE FROM `notice` WHERE `id_user`='" . $this->user['id'] . "'");
+            Functions::redirect('/profile/notice');
+        }
+
+        if ($_POST['close']) {
+            Functions::redirect('/profile/notice');
+        }
+        SmartySingleton::instance()->display(SMARTY_TEMPLATE_LOAD . '/templates/modules/profile/notice_clear.tpl');
+    }
+
     function friends() {
         //список
         $count = DB::run("SELECT COUNT(*) FROM `friends` WHERE `id_user`='" . $this->user['id'] . "' OR `user_id`= '" . $this->user['id'] . "'")->fetchColumn();
@@ -666,14 +681,16 @@ class ProfileModel extends Base {
             if (!isset($error)) {
                 DB::run("INSERT INTO `blog` SET 
                     `id_user`='" . $this->user['id'] . "',
-                        `refid`='" . intval($_POST['refid']) . "',
+                        `refid`='" . Cms::Int($_POST['refid']) . "',
                             `name`='" . Cms::Input($_POST['name']) . "', 
                                 `translate` = '" . Functions::name_replace(Cms::Input($_POST['name'])) . "', 
                                     `text`='" . Cms::Input($_POST['text']) . "',
                                         `time`='" . Cms::realtime() . "',
                                             `keywords`='" . Functions::seokeywords(Cms::Input($_POST['name'])) . "', 
                                                 `description`='" . BBcode::delete(Functions::truncate(Cms::Input($_POST['text']), 350)) . "'");
-
+                
+                Cms::addballs(Cms::setup('balls_add_blog'));//прибавляем баллы
+                
                 Functions::redirect(Cms::setup('home') . '/profile/blog');
             }
         }
@@ -699,9 +716,9 @@ class ProfileModel extends Base {
             }
 
             if (!isset($error)) {
-                $category = DB::run("SELECT * FROM `blog_category` WHERE `id`='" . intval($_POST['refid']) . "'")->fetch(PDO::FETCH_ASSOC);
+                $category = DB::run("SELECT * FROM `blog_category` WHERE `id`='" . Cms::Int($_POST['refid']) . "'")->fetch(PDO::FETCH_ASSOC);
                 DB::run("UPDATE `blog` SET 
-                        `refid`='" . intval($_POST['refid']) . "',
+                        `refid`='" . Cms::Int($_POST['refid']) . "',
                             `name`='" . Cms::Input($_POST['name']) . "', 
                                 `translate` = '" . Functions::name_replace(Cms::Input($_POST['name'])) . "', 
                                     `text`='" . Cms::Input($_POST['text']) . "',
@@ -709,7 +726,7 @@ class ProfileModel extends Base {
                                             `description`='" . BBcode::delete(Functions::truncate(Cms::Input($_POST['text']), 350)) . "' WHERE `id`='" . $row['id'] . "'");
 
                 if ($row['refid'] != $_POST['refid']) {
-                    DB::run("UPDATE `blog_comments` SET `refid`='" . intval($_POST['refid']) . "' WHERE `id_post`='" . $row['id'] . "'");
+                    DB::run("UPDATE `blog_comments` SET `refid`='" . Cms::Int($_POST['refid']) . "' WHERE `id_post`='" . $row['id'] . "'");
                 }
 
                 Functions::redirect(Cms::setup('home') . '/profile/blog');
@@ -801,7 +818,7 @@ class ProfileModel extends Base {
                                         `keywords`='" . Functions::seokeywords(Cms::Input($_POST['name'])) . "', 
                                             `description`='" . BBcode::delete(Functions::truncate(Cms::Input($_POST['text']), 350)) . "'");
 
-                $fid = DB::$pdo->lastInsertId();
+                $fid = DB::lastInsertId();
 
                 mkdir('files/user/' . $this->user['id'] . '/gallery/' . $fid);
 
@@ -1064,6 +1081,102 @@ class ProfileModel extends Base {
             'row' => $row
         ));
         SmartySingleton::instance()->display(SMARTY_TEMPLATE_LOAD . '/templates/modules/profile/gallery_del.tpl');
+    }
+
+    function library() {
+        $countart = DB::run("SELECT COUNT(*) FROM `library` WHERE `id_user`='" . $this->user['id'] . "'")->fetchColumn();
+        if ($countart > 0) {
+            $reqart = DB::run("SELECT `library`.*, " . User::data('library') . ", (SELECT COUNT(1) FROM `library_comments` WHERE `library_comments`.`refid`=`library`.`id`) AS `comments` FROM `library` WHERE `id_user`='" . $this->user['id'] . "' ORDER BY `id` DESC LIMIT " . $this->page . ", " . $this->message);
+            while ($rowart = $reqart->fetch(PDO::FETCH_ASSOC)) {
+                $arrayrowart[] = $rowart;
+                $text[] = BBcode::delete($rowart['text']);
+            }
+        }
+
+        SmartySingleton::instance()->assign(array(
+            'text' => $text,
+            'countart' => $countart,
+            'arrayrowart' => $arrayrowart,
+            'pagenav' => Functions::pagination('/profile/library?', $this->page, $countart, $this->message)
+        ));
+        SmartySingleton::instance()->display(SMARTY_TEMPLATE_LOAD . '/templates/modules/profile/library.tpl');
+    }
+
+    function library_edit($id) {
+        $row = DB::run("SELECT * FROM `library` WHERE `id`='" . $id . "'")->fetch(PDO::FETCH_ASSOC);
+
+        if ($_POST['ok']) {
+
+            if (mb_strlen(Cms::Input($_POST['name'])) < 2 || mb_strlen(Cms::Input($_POST['name'])) > 250) {
+                $error .= 'Недопустимая длина названия статьи!<br/>';
+            }
+
+            if (mb_strlen(Cms::Input($_POST['autor'])) > 250) {
+                $error .= 'Недопустимая длина автора!<br/>';
+            }
+
+            if (mb_strlen(Cms::Input($_POST['text'])) < 2 || mb_strlen(Cms::Input($_POST['text'])) > 100000) {
+                $error .= 'Недопустимая длина содержания статьи!<br/>';
+            }
+
+            if (!isset($error)) {
+                DB::run("UPDATE `library` SET 
+                            `name`='" . Cms::Input($_POST['name']) . "', 
+                                `translate` = '" . Functions::name_replace(Cms::Input($_POST['name'])) . "', 
+                                    `autor`='" . Cms::Input($_POST['autor']) . "', 
+                                        `text`='" . Cms::Input($_POST['text']) . "', 
+                                            `keywords`='" . Functions::seokeywords(Cms::Input($_POST['name'])) . "', 
+                                                `description`='" . BBcode::delete(Functions::truncate(Cms::Input($_POST['text']), 350)) . "' WHERE `id`='" . $row['id'] . "'");
+
+                Functions::redirect(Cms::setup('home') . '/profile/library');
+            }
+        }
+
+        SmartySingleton::instance()->assign(array(
+            'row' => $row,
+            'error' => $error
+        ));
+        SmartySingleton::instance()->display(SMARTY_TEMPLATE_LOAD . '/templates/modules/profile/library_edit.tpl');
+    }
+
+    function library_del($id) {
+        $row = DB::run("SELECT * FROM `library` WHERE `id`='" . $id . "'")->fetch(PDO::FETCH_ASSOC);
+
+        if ($_POST['ok']) {
+            DB::run("DELETE FROM `library` WHERE `id` = '" . $row['id'] . "' LIMIT 1");
+            DB::run("DELETE FROM `library_comments` WHERE `refid` = '" . $row['id'] . "'");
+
+            Functions::redirect(Cms::setup('home') . '/profile/library');
+        }
+
+        if ($_POST['close']) {
+            Functions::redirect(Cms::setup('home') . '/profile/library');
+        }
+
+        SmartySingleton::instance()->assign(array(
+            'row' => $row,
+            'error' => $error
+        ));
+        SmartySingleton::instance()->display(SMARTY_TEMPLATE_LOAD . '/templates/modules/profile/library_del.tpl');
+    }
+
+    function files() {
+        //файлы
+        $count = DB::run("SELECT COUNT(*) FROM `files` WHERE `id_user`='" . $this->user['id'] . "' AND `id_file`='0' AND `user`='0'")->fetchColumn();
+        if ($count > 0) {
+            $req = DB::run("SELECT `files`.*, (SELECT COUNT(1) FROM `files_comments` WHERE `files_comments`.`id_file`=`files`.`id`) AS `comments` FROM `files` WHERE `id_user`='" . $this->user['id'] . "' AND `id_file`='0' AND `user`='0' ORDER BY `id` DESC LIMIT " . $this->page . ", " . $this->message);
+            while ($rows = $req->fetch(PDO::FETCH_ASSOC)) {
+                $arrayrow[] = $rows;
+            }
+        }
+
+        SmartySingleton::instance()->assign(array(
+            'text' => $text,
+            'count_files' => $count,
+            'arrayrow_files' => $arrayrow,
+            'pagenav' => Functions::pagination('/profile/files?', $this->page, $countart, $this->message)
+        ));
+        SmartySingleton::instance()->display(SMARTY_TEMPLATE_LOAD . '/templates/modules/profile/files.tpl');
     }
 
 }

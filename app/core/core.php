@@ -6,51 +6,20 @@ ob_start();
 session_start();
 session_name("VCMS");
 
-spl_autoload_register('ClassAutoload');
-spl_autoload_register('ControllersAutoload');
-spl_autoload_register('AdminControllersAutoload');
-spl_autoload_register('ModelsAutoload');
-spl_autoload_register('AdminModelsAutoload');
-
-function ClassAutoload($class) {
-    $path = HOME . '/app/core/classes/' . $class . '.php';
-    if (is_file($path)) {
-        require_once $path;
-        return;
+spl_autoload_register(function ($class) {
+    $dirs = array(
+        HOME . '/app/core/classes/',
+        HOME . '/app/controllers/',
+        HOME . '/app/controllers/admin/',
+        HOME . '/app/models/',
+        HOME . '/app/models/admin/',
+    );
+    foreach ($dirs as $dir) {
+        if (is_file($dir . $class . '.php')) {
+            require_once($dir . $class . '.php');
+        }
     }
-}
-
-function ControllersAutoload($class) {
-    $path = HOME . '/app/controllers/' . $class . '.php';
-    if (is_file($path)) {
-        require_once $path;
-        return;
-    }
-}
-
-function AdminControllersAutoload($class) {
-    $path = HOME . '/app/controllers/admin/' . $class . '.php';
-    if (is_file($path)) {
-        require_once $path;
-        return;
-    }
-}
-
-function ModelsAutoload($class) {
-    $path = HOME . '/app/models/' . $class . '.php';
-    if (is_file($path)) {
-        require_once $path;
-        return;
-    }
-}
-
-function AdminModelsAutoload($class) {
-    $path = HOME . '/app/models/admin/' . $class . '.php';
-    if (is_file($path)) {
-        require_once $path;
-        return;
-    }
-}
+});
 
 if (User::auth()) {
     $message = User::$user['message'];
@@ -75,7 +44,7 @@ SmartySingleton::instance()->assign(array(
     'panel' => Cms::setup('adminpanel'),
     'skin' => $skin,
     'user' => User::auth(),
-    'url' => Cms::setup('home').''.$_SERVER['REQUEST_URI']
+    'url' => Cms::setup('home') . '' . $_SERVER['REQUEST_URI']
 ));
 
 /* определяем устройство и пишем в сессию */

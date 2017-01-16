@@ -38,6 +38,7 @@
             </p>
             {if $user.level > 40}
                 <span class="breadcrumb">
+                    {if $row_files.user == 1}<a href="{$home}/download/moderation/yes/{$row_files.id}" title="Промодерировать"><i class="fa fa-plus-square"></i></a>{/if}
                     <a href="{$home}/download/edit/{$row_files.id}" title="Редактировать"><i class="fa fa-pencil"></i></a>
                     <a href="{$home}/download/del/{$row_files.id}" title="Удалить"><i class="fa fa-trash-o"></i></a>
                     <a href="{$home}/download/file/{$row_files.id}" title="Дополнительные файлы"><i class="fa fa-upload"></i></a>

@@ -80,7 +80,7 @@ class ForumModel extends Base {
                                             `type`='" . Cms::Input($_POST['type']) . "'");
                 }
 
-                $fid = DB::$pdo->lastInsertId();
+                $fid = DB::lastInsertId();
 
                 DB::run("UPDATE `forum` SET `realid` = '" . $fid . "' WHERE `id`='" . $fid . "'");
 
@@ -181,9 +181,9 @@ class ForumModel extends Base {
                     $count = DB::run("SELECT COUNT(*) FROM `post` WHERE `id_forum` = '" . $row['id'] . "' AND `id_user`='" . $post['id_user'] . "'")->fetchColumn();
                     $countforum = DB::run("SELECT COUNT(*) FROM `post` WHERE `id_forum`='" . $row['id'] . "'")->fetchColumn();
                     //обновляем кол-во постов у пользователей
-                    DB::run("UPDATE `users` SET `countpost` = '" . intval($post['countpost'] - $count) . "' WHERE `id` = '" . $post['id_user'] . "'");
+                    DB::run("UPDATE `users` SET `countpost` = '" . Cms::Int($post['countpost'] - $count) . "' WHERE `id` = '" . $post['id_user'] . "'");
                     //у раздела
-                    DB::run("UPDATE `forum` SET `countpost` = '" . intval($forum['countpost'] - $countforum) . "' WHERE `id` = '" . $row['refid'] . "'");
+                    DB::run("UPDATE `forum` SET `countpost` = '" . Cms::Int($forum['countpost'] - $countforum) . "' WHERE `id` = '" . $row['refid'] . "'");
                 }
 
                 $reqs = DB::run("SELECT `tema`.*, (SELECT `counttema` FROM `users` WHERE `users`.`id`=`tema`.`id_user`) AS `counttema` FROM `tema` WHERE `id_forum` = '" . $row['id'] . "'");
@@ -191,9 +191,9 @@ class ForumModel extends Base {
                     $counts = DB::run("SELECT COUNT(*) FROM `tema` WHERE `id_forum` = '" . $row['id'] . "' AND `id_user`='" . $tema['id_user'] . "'")->fetchColumn();
                     $countsforum = DB::run("SELECT COUNT(*) FROM `tema` WHERE `id_forum`='" . $row['id'] . "'")->fetchColumn();
                     //обновляем кол-во тем у пользователей
-                    DB::run("UPDATE `users` SET `counttema` = '" . intval($tema['counttema'] - $counts) . "' WHERE `id` = '" . $tema['id_user'] . "'");
+                    DB::run("UPDATE `users` SET `counttema` = '" . Cms::Int($tema['counttema'] - $counts) . "' WHERE `id` = '" . $tema['id_user'] . "'");
                     //у раздела
-                    DB::run("UPDATE `forum` SET `counttema` = '" . intval($forum['counttema'] - $countsforum) . "' WHERE `id` = '" . $row['refid'] . "'");
+                    DB::run("UPDATE `forum` SET `counttema` = '" . Cms::Int($forum['counttema'] - $countsforum) . "' WHERE `id` = '" . $row['refid'] . "'");
                 }
 
                 DB::run("DELETE FROM `forum` WHERE `id` = '" . $row['id'] . "' LIMIT 1");
@@ -221,7 +221,7 @@ class ForumModel extends Base {
                     $count = DB::run("SELECT COUNT(*) FROM `post` WHERE `id_razdel` = '" . $row['id'] . "' AND `id_user`='" . $post['id_user'] . "'")->fetchColumn();
                     //обновляем кол-во постов у пользователей
                     if ($count > 0) {
-                        DB::run("UPDATE `users` SET `countpost` = '" . intval($post['countpost'] - $count) . "' WHERE `id` = '" . $post['id_user'] . "'");
+                        DB::run("UPDATE `users` SET `countpost` = '" . Cms::Int($post['countpost'] - $count) . "' WHERE `id` = '" . $post['id_user'] . "'");
                     }
                 }
 
@@ -230,7 +230,7 @@ class ForumModel extends Base {
                     $counts = DB::run("SELECT COUNT(*) FROM `tema` WHERE `id_razdel` = '" . $row['id'] . "' AND `id_user`='" . $tema['id_user'] . "'")->fetchColumn();
                     //обновляем кол-во тем у пользователей
                     if ($counts > 0) {
-                        DB::run("UPDATE `users` SET `counttema` = '" . intval($tema['counttema'] - $counts) . "' WHERE `id` = '" . $tema['id_user'] . "'");
+                        DB::run("UPDATE `users` SET `counttema` = '" . Cms::Int($tema['counttema'] - $counts) . "' WHERE `id` = '" . $tema['id_user'] . "'");
                     }
                 }
 
@@ -344,7 +344,7 @@ class ForumModel extends Base {
                 DB::run("UPDATE `tema` SET 
                     `id_razdel`='" . $f['refid'] . "', 
                         `id_forum`='" . $f['id'] . "',
-                            `realid`='" . intval($_POST['realid']) . "',
+                            `realid`='" . Cms::Int($_POST['realid']) . "',
                                 `name` = '" . Cms::Input($_POST['name']) . "', 
                                     `translate` = '" . Functions::name_replace(Cms::Input($_POST['name'])) . "', 
                                         `type` = '" . $f['type'] . "' WHERE `id`='" . $tema['id'] . "'");
@@ -398,11 +398,11 @@ class ForumModel extends Base {
 
         if ($_POST['ok']) {
             //обновляем кол-во тем у пользователя
-            DB::run("UPDATE `users` SET `counttema` = '" . intval($tema['counttema'] - 1) . "' WHERE `id` = '" . $tema['id_user'] . "'");
+            DB::run("UPDATE `users` SET `counttema` = '" . Cms::Int($tema['counttema'] - 1) . "' WHERE `id` = '" . $tema['id_user'] . "'");
 
             //обновляем кол-во тем у форума, подфорума
-            DB::run("UPDATE `forum` SET `counttema` = '" . intval($forum['counttema'] - 1) . "' WHERE `id` = '" . $forum['id'] . "'");
-            DB::run("UPDATE `forum` SET `counttema` = '" . intval($row['counttema'] - 1) . "' WHERE `id` = '" . $row['id'] . "'");
+            DB::run("UPDATE `forum` SET `counttema` = '" . Cms::Int($forum['counttema'] - 1) . "' WHERE `id` = '" . $forum['id'] . "'");
+            DB::run("UPDATE `forum` SET `counttema` = '" . Cms::Int($row['counttema'] - 1) . "' WHERE `id` = '" . $row['id'] . "'");
 
             $req = DB::run("SELECT `post`.*, (SELECT `countpost` FROM `users` WHERE `users`.`id`=`post`.`id_user`) AS `countpost` FROM `post` WHERE `id_tema` = '" . $tema['id'] . "'");
             while ($post = $req->fetch(PDO::FETCH_ASSOC)) {
@@ -410,9 +410,9 @@ class ForumModel extends Base {
                 $countrazdel = DB::run("SELECT COUNT(*) FROM `post` WHERE `id_tema` = '" . $tema['id'] . "' AND `id_razdel`='" . $post['id_razdel'] . "'")->fetchColumn();
                 $countforum = DB::run("SELECT COUNT(*) FROM `post` WHERE `id_tema` = '" . $tema['id'] . "' AND `id_forum`='" . $post['id_forum'] . "'")->fetchColumn();
                 //обновляем кол-во постов у пользователей
-                DB::run("UPDATE `users` SET `countpost` = '" . intval($post['countpost'] - $count) . "' WHERE `id` = '" . $post['id_user'] . "'");
-                DB::run("UPDATE `forum` SET `countpost` = '" . intval($forum['countpost'] - $countrazdel) . "' WHERE `id` = '" . $forum['id'] . "'");
-                DB::run("UPDATE `forum` SET `countpost` = '" . intval($row['countpost'] - $countforum) . "' WHERE `id` = '" . $row['id'] . "'");
+                DB::run("UPDATE `users` SET `countpost` = '" . Cms::Int($post['countpost'] - $count) . "' WHERE `id` = '" . $post['id_user'] . "'");
+                DB::run("UPDATE `forum` SET `countpost` = '" . Cms::Int($forum['countpost'] - $countrazdel) . "' WHERE `id` = '" . $forum['id'] . "'");
+                DB::run("UPDATE `forum` SET `countpost` = '" . Cms::Int($row['countpost'] - $countforum) . "' WHERE `id` = '" . $row['id'] . "'");
             }
 
             $reqfile = DB::run("SELECT * FROM `post_files` WHERE `id_tema` = '" . $tema['id'] . "'");
@@ -458,10 +458,13 @@ class ForumModel extends Base {
             }
 
             if (!isset($error)) {
-                DB::run("UPDATE `post` SET `text` = '" . Cms::Input($_POST['text']) . "' WHERE `id`='" . $post['id'] . "'");
+                DB::run("UPDATE `post` SET `text` = '" . Cms::Input($_POST['text']) . "',
+                        `timeedit` = '" . Cms::realtime() . "',
+                        `kedit` = '" . Cms::Int($post['kedit'] + 1) . "',
+                        `id_user_edit` = '" . $this->user['id'] . "' WHERE `id`='" . $post['id'] . "'");
 
                 for ($i = 0; $i < count($_POST['del']); $i++) {
-                    $file = DB::run("SELECT * FROM `post_files` WHERE `id`='" . intval($_POST['del'][$i]) . "'")->fetch(PDO::FETCH_ASSOC);
+                    $file = DB::run("SELECT * FROM `post_files` WHERE `id`='" . Cms::Int($_POST['del'][$i]) . "'")->fetch(PDO::FETCH_ASSOC);
                     Cms::DelFile('files/user/' . $post['id_user'] . '/forum/' . $file['file']);
                     DB::run("DELETE FROM `post_files` WHERE `id` = '" . $file['id'] . "'");
                 }
@@ -503,11 +506,11 @@ class ForumModel extends Base {
             DB::run("DELETE FROM `post` WHERE `id` = '" . $post['id'] . "' LIMIT 1");
 
             //обновляем кол-во постов у пользователя
-            DB::run("UPDATE `users` SET `countpost` = '" . intval($post['countpost'] - 1) . "' WHERE `id` = '" . $post['id_user'] . "'");
+            DB::run("UPDATE `users` SET `countpost` = '" . Cms::Int($post['countpost'] - 1) . "' WHERE `id` = '" . $post['id_user'] . "'");
 
             //обновляем кол-во постов у форума, подфорума
-            DB::run("UPDATE `forum` SET `countpost` = '" . intval($forum['countpost'] - 1) . "' WHERE `id` = '" . $forum['id'] . "'");
-            DB::run("UPDATE `forum` SET `countpost` = '" . intval($rows['countpost'] - 1) . "' WHERE `id` = '" . $rows['id'] . "'");
+            DB::run("UPDATE `forum` SET `countpost` = '" . Cms::Int($forum['countpost'] - 1) . "' WHERE `id` = '" . $forum['id'] . "'");
+            DB::run("UPDATE `forum` SET `countpost` = '" . Cms::Int($rows['countpost'] - 1) . "' WHERE `id` = '" . $rows['id'] . "'");
 
             $reqfile = DB::run("SELECT * FROM `post_files` WHERE `id_post` = '" . $post['id'] . "'");
             while ($file = $reqfile->fetch(PDO::FETCH_ASSOC)) {
@@ -520,7 +523,7 @@ class ForumModel extends Base {
             DB::run("UPDATE `tema` SET
                     `id_user_last` = '" . $post['id_user'] . "',
                         `id_post_last` = '" . $post['id'] . "',
-                            `countpost` = '" . intval($tema['countpost'] - 1) . "' WHERE `id` = '" . $tema['id'] . "'");
+                            `countpost` = '" . Cms::Int($tema['countpost'] - 1) . "' WHERE `id` = '" . $tema['id'] . "'");
 
             if (Cms::setup('adminlogs') == 1) {
                 Cms::adminlogs('Форум', 'Удаление поста к теме ' . Functions::esc($tema['name']));
@@ -586,6 +589,26 @@ class ForumModel extends Base {
             'starts' => $starts
         ));
         SmartySingleton::instance()->display(SMARTY_TEMPLATE_LOAD . '/templates/modules/forum/post_quote.tpl');
+    }
+
+    function post($id, $id2, $id3, $id4) {
+        $post = DB::run("SELECT post. * , " . User::data('post') . " FROM `post` WHERE `id`='" . $id4 . "'")->fetch(PDO::FETCH_ASSOC);
+        $tema = DB::run("SELECT * FROM `tema` WHERE `id`='" . $id3 . "'")->fetch(PDO::FETCH_ASSOC);
+        $rows = DB::run("SELECT * FROM `forum` WHERE `id`='" . $id2 . "'")->fetch(PDO::FETCH_ASSOC);
+        $forum = DB::run("SELECT * FROM `forum` WHERE `id`='" . $id . "'")->fetch(PDO::FETCH_ASSOC);
+
+        $count = DB::run("SELECT COUNT(*) FROM `post` WHERE `id_tema` = '" . $post['id_tema'] . "'  AND `id` " . (0 ? ">=" : "<=") . " '$id4'")->fetchColumn();
+        $starts = max(0, (int) $count - (((int) $count % (int) $this->message) == 0 ? $this->message : ((int) $count % (int) $this->message)));
+
+        SmartySingleton::instance()->assign(array(
+            'row' => $rows,
+            'rows' => $post,
+            'text' => Cms::bbcode($post['text']),
+            'tema' => $tema,
+            'forum' => $forum,
+            'starts' => $starts
+        ));
+        SmartySingleton::instance()->display(SMARTY_TEMPLATE_LOAD . '/templates/modules/forum/post.tpl');
     }
 
     function forum($id, $id2) {
@@ -692,7 +715,7 @@ class ForumModel extends Base {
                                         `time` = '" . Cms::realtime() . "', 
                                             `type` = '" . $forum['type'] . "'");
 
-                $fid = DB::$pdo->lastInsertId();
+                $fid = DB::lastInsertId();
 
                 DB::run("INSERT INTO `post` SET 
                 `id_razdel` = '" . $forum['id'] . "', 
@@ -703,7 +726,7 @@ class ForumModel extends Base {
                                     `time` = '" . Cms::realtime() . "', 
                                         `type` = '" . $forum['type'] . "'");
 
-                $postid = DB::$pdo->lastInsertId();
+                $postid = DB::lastInsertId();
 
                 DB::run("UPDATE `tema` SET
                         `id_user_last` = '" . $this->user['id'] . "',
@@ -711,12 +734,13 @@ class ForumModel extends Base {
                                 `countpost` = '1' WHERE `id` = '" . $fid . "'");
 
                 //обновляем кол-во постов/тем у пользователя
-                DB::run("UPDATE `users` SET `counttema` = '" . intval($this->user['counttema'] + 1) . "', `countpost` = '" . intval($this->user['countpost'] + 1) . "' WHERE `id` = '" . $this->user['id'] . "'");
+                DB::run("UPDATE `users` SET `counttema` = '" . Cms::Int($this->user['counttema'] + 1) . "', `countpost` = '" . Cms::Int($this->user['countpost'] + 1) . "' WHERE `id` = '" . $this->user['id'] . "'");
                 //обновляем кол-во постов/тем у форума, подфорума
-                DB::run("UPDATE `forum` SET `counttema` = '" . intval($forum['counttema'] + 1) . "', `countpost` = '" . intval($forum['countpost'] + 1) . "' WHERE `id` = '" . $forum['id'] . "'");
-                DB::run("UPDATE `forum` SET `counttema` = '" . intval($row['counttema'] + 1) . "', `countpost` = '" . intval($row['countpost'] + 1) . "' WHERE `id` = '" . $row['id'] . "'");
+                DB::run("UPDATE `forum` SET `counttema` = '" . Cms::Int($forum['counttema'] + 1) . "', `countpost` = '" . Cms::Int($forum['countpost'] + 1) . "' WHERE `id` = '" . $forum['id'] . "'");
+                DB::run("UPDATE `forum` SET `counttema` = '" . Cms::Int($row['counttema'] + 1) . "', `countpost` = '" . Cms::Int($row['countpost'] + 1) . "' WHERE `id` = '" . $row['id'] . "'");
 
                 Cms::antiflood(); //антифлуд
+                Cms::addballs(Cms::setup('balls_add_theme'));//прибавляем баллы
 
                 /* обработка загрузки файлов */
                 for ($i = 0; $i < count($_FILES['file']['name']); $i++) {
@@ -807,10 +831,10 @@ class ForumModel extends Base {
                             `id_forum` = '" . $row['id'] . "', 
                                 `id_tema` = '" . $tema['id'] . "', 
                                      `id_user` = '" . $this->user['id'] . "',
-                                        `vote` = '" . intval($_POST['reply']) . "',
+                                        `vote` = '" . Cms::Int($_POST['reply']) . "',
                                             `time` = '" . Cms::realtime() . "'");
 
-                DB::run("UPDATE `tema_vote` SET `count` = `count` + 1 WHERE id = '" . intval($_POST['reply']) . "'");
+                DB::run("UPDATE `tema_vote` SET `count` = `count` + 1 WHERE id = '" . Cms::Int($_POST['reply']) . "'");
 
                 Functions::redirect($_SERVER['REQUEST_URI']);
             }
@@ -971,9 +995,9 @@ class ForumModel extends Base {
 
     function load($id, $id2, $id3, $id4) {
         $row = DB::run("SELECT * FROM `post_files` WHERE `id`='" . $id4 . "'")->fetch(PDO::FETCH_ASSOC);
-        DB::run("UPDATE `post_files` SET `loadcounts` = '" . intval($row['loadcounts'] + 1) . "', `timeload` = '" . Cms::realtime() . "' WHERE `id` = '" . $row['id'] . "'");
+        DB::run("UPDATE `post_files` SET `loadcounts` = '" . Cms::Int($row['loadcounts'] + 1) . "', `timeload` = '" . Cms::realtime() . "' WHERE `id` = '" . $row['id'] . "'");
         if ($row['type'] == 'png' || $row['type'] == 'jpg' || $row['type'] == 'jpeg' || $row['type'] == 'gif') {
-            Functions::redirect(Cms::setup('home').'/files/user/' . $row['id_user'] . '/forum/' . $row['file']);
+            Functions::redirect(Cms::setup('home') . '/files/user/' . $row['id_user'] . '/forum/' . $row['file']);
         } else {
             Download::load('files/user/' . $row['id_user'] . '/forum/' . $row['file']);
         }

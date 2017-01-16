@@ -1,6 +1,6 @@
 <?php
 
-require_once(HOME . '/app/lib/smarty/Smarty.class.php');
+require_once(HOME . '/app/lib/smarty/Autoloader.php');
 
 class SmartySingleton {
 
@@ -8,6 +8,7 @@ class SmartySingleton {
 
     public static function instance() {
         if (!isset(self::$instance)) {
+            Smarty_Autoloader::register();
             $smarty = new Smarty;
             //$smarty->caching = Smarty::CACHING_LIFETIME_CURRENT;
             $smarty->debugging = Cms::setup('debugging_smarty');

@@ -9,7 +9,7 @@
     <div class="breadcrumb">
         Добавил: <a href="{$home}/id{$row.id_user}">{$row.login}</a>  | Дата: {$row.time|times} | Просмотров: {$row.views|number}
     </div>
-    <p><img src="{$home}/files/user/{$row.id_user}/gallery/{$row.id_gallery}/small-{$row.photo}" alt="" title="{$row.name|escape|esc}"/></p>
+    <p><img src="{$home}/files/user/{$row.id_user}/gallery/{$row.id_gallery}/small-{$row.photo}" class="img-responsive" alt="" title="{$row.name|escape|esc}"/></p>
         {if !empty($text)}
         <p>{$text|escape|esc|nl2br}</p>
     {/if}

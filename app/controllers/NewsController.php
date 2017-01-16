@@ -68,6 +68,18 @@ class NewsController {
         $this->model->del($id);
         Cms::footer();
     }
+    
+    function mail($id) {
+        if (User::$user['level'] < 50) {
+            Functions::redirect(Cms::setup('home'));
+        }
+        if (DB::run("SELECT COUNT(*) FROM `news` WHERE `id`='" . $id . "'")->fetchColumn() == 0) {
+            Functions::redirect(Cms::setup('home') . '/news');
+        }
+        Cms::header('Произвести рассылку');
+        $this->model->mail($id);
+        Cms::footer();
+    }
 
     function all() {
         if (User::$user['level'] < 30) {

@@ -32,7 +32,7 @@ class AdminSitemapModel {
             $sitemapTXT .= "\r\n" . $url;
             $sitemap->addItem($url, time(), Cms::setup('sitemap_changefreq'), Cms::setup('sitemap_priority'));
         }
-        
+
         //категории ЗЦ
         $req = DB::run("SELECT * FROM `category` ORDER BY `realid` ASC");
         while ($row = $req->fetch(PDO::FETCH_ASSOC)) {
@@ -40,15 +40,15 @@ class AdminSitemapModel {
             $sitemapTXT .= "\r\n" . $url;
             $sitemap->addItem($url, time(), Cms::setup('sitemap_changefreq'), Cms::setup('sitemap_priority'));
         }
-        
+
         //файлы
-        $req = DB::run("SELECT * FROM `files` ORDER BY `id` DESC");
+        $req = DB::run("SELECT * FROM `files` WHERE `user`='0' ORDER BY `id` DESC");
         while ($row = $req->fetch(PDO::FETCH_ASSOC)) {
             $url = Cms::setup('home') . '/download/' . $row['id'] . '-' . $row['translate'];
             $sitemapTXT .= "\r\n" . $url;
             $sitemap->addItem($url, time(), Cms::setup('sitemap_changefreq'), Cms::setup('sitemap_priority'));
         }
-        
+
         //категории форума
         $req = DB::run("SELECT * FROM `forum` WHERE `refid`='0' AND `type`='0' ORDER BY `realid` ASC");
         while ($row = $req->fetch(PDO::FETCH_ASSOC)) {
@@ -56,23 +56,23 @@ class AdminSitemapModel {
             $sitemapTXT .= "\r\n" . $url;
             $sitemap->addItem($url, time(), Cms::setup('sitemap_changefreq'), Cms::setup('sitemap_priority'));
         }
-        
+
         //подкатегории форума
         $req = DB::run("SELECT * FROM `forum` WHERE `refid`>'0' AND `type`='0' ORDER BY `realid` ASC");
         while ($row = $req->fetch(PDO::FETCH_ASSOC)) {
-            $url = Cms::setup('home') . '/forum/' . $row['refid'].'/'.$row['id'];
+            $url = Cms::setup('home') . '/forum/' . $row['refid'] . '/' . $row['id'];
             $sitemapTXT .= "\r\n" . $url;
             $sitemap->addItem($url, time(), Cms::setup('sitemap_changefreq'), Cms::setup('sitemap_priority'));
         }
-        
+
         //темы форума
         $req = DB::run("SELECT * FROM `tema` WHERE `type`='0' ORDER BY `id` ASC");
         while ($row = $req->fetch(PDO::FETCH_ASSOC)) {
-            $url = Cms::setup('home') . '/forum/' . $row['id_razdel'].'/'.$row['id_forum'].'/'.$row['id'];
+            $url = Cms::setup('home') . '/forum/' . $row['id_razdel'] . '/' . $row['id_forum'] . '/' . $row['id'];
             $sitemapTXT .= "\r\n" . $url;
             $sitemap->addItem($url, time(), Cms::setup('sitemap_changefreq'), Cms::setup('sitemap_priority'));
         }
-        
+
         //пользователи
         $req = DB::run("SELECT * FROM `users` ORDER BY `id` ASC");
         while ($row = $req->fetch(PDO::FETCH_ASSOC)) {
@@ -80,7 +80,7 @@ class AdminSitemapModel {
             $sitemapTXT .= "\r\n" . $url;
             $sitemap->addItem($url, time(), Cms::setup('sitemap_changefreq'), Cms::setup('sitemap_priority'));
         }
-        
+
         //категории блогов
         $req = DB::run("SELECT * FROM `blog_category` ORDER BY `realid` ASC");
         while ($row = $req->fetch(PDO::FETCH_ASSOC)) {
@@ -88,15 +88,15 @@ class AdminSitemapModel {
             $sitemapTXT .= "\r\n" . $url;
             $sitemap->addItem($url, time(), Cms::setup('sitemap_changefreq'), Cms::setup('sitemap_priority'));
         }
-        
+
         //псоты блога
         $req = DB::run("SELECT * FROM `blog` ORDER BY `id` ASC");
         while ($row = $req->fetch(PDO::FETCH_ASSOC)) {
-            $url = Cms::setup('home') . '/blogs/' . $row['refid'].'/'.$row['id'].'-'.$row['translate'];
+            $url = Cms::setup('home') . '/blogs/' . $row['refid'] . '/' . $row['id'] . '-' . $row['translate'];
             $sitemapTXT .= "\r\n" . $url;
             $sitemap->addItem($url, time(), Cms::setup('sitemap_changefreq'), Cms::setup('sitemap_priority'));
         }
-        
+
         //галереи
         $req = DB::run("SELECT * FROM `gallery` ORDER BY `id` ASC");
         while ($row = $req->fetch(PDO::FETCH_ASSOC)) {
@@ -104,11 +104,27 @@ class AdminSitemapModel {
             $sitemapTXT .= "\r\n" . $url;
             $sitemap->addItem($url, time(), Cms::setup('sitemap_changefreq'), Cms::setup('sitemap_priority'));
         }
-        
+
         //фотографии
         $req = DB::run("SELECT * FROM `gallery_photo` ORDER BY `id` ASC");
         while ($row = $req->fetch(PDO::FETCH_ASSOC)) {
-            $url = Cms::setup('home') . '/gallery/' . $row['id_gallery'].'/'.$row['id'];
+            $url = Cms::setup('home') . '/gallery/' . $row['id_gallery'] . '/' . $row['id'];
+            $sitemapTXT .= "\r\n" . $url;
+            $sitemap->addItem($url, time(), Cms::setup('sitemap_changefreq'), Cms::setup('sitemap_priority'));
+        }
+
+        //категории библиотеки
+        $req = DB::run("SELECT * FROM `library_category` ORDER BY `id` ASC");
+        while ($row = $req->fetch(PDO::FETCH_ASSOC)) {
+            $url = Cms::setup('home') . '/library/' . $row['id'];
+            $sitemapTXT .= "\r\n" . $url;
+            $sitemap->addItem($url, time(), Cms::setup('sitemap_changefreq'), Cms::setup('sitemap_priority'));
+        }
+
+        //статьи библиотеки
+        $req = DB::run("SELECT * FROM `library` ORDER BY `id` ASC");
+        while ($row = $req->fetch(PDO::FETCH_ASSOC)) {
+            $url = Cms::setup('home') . '/library/' . $row['id'] . '-' . $row['translate'];
             $sitemapTXT .= "\r\n" . $url;
             $sitemap->addItem($url, time(), Cms::setup('sitemap_changefreq'), Cms::setup('sitemap_priority'));
         }
@@ -123,7 +139,7 @@ class AdminSitemapModel {
             }
             $index->write();
         }
-        
+
         //Запись в файл
         if (Cms::setup('sitemap_txt') == 1) {
             $fp = fopen('sitemap/sitemap.txt', 'w+');

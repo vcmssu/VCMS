@@ -158,6 +158,25 @@ class DownloadController {
         Cms::footer();
     }
 
+    function moderation() {
+        if (User::$user['level'] < 50) {
+            Functions::redirect(Cms::setup('home'));
+        }
+        Cms::header('Модерация файлов');
+        $this->model->moderation();
+        Cms::footer();
+    }
+
+    function moderation_yes($id) {
+        if (User::$user['level'] < 50) {
+            Functions::redirect(Cms::setup('home'));
+        }
+        if (DB::query("SELECT COUNT(*) FROM `files` WHERE `id`='" . $id . "'")->fetchColumn() == 0) {
+            Functions::redirect(Cms::setup('home'));
+        }
+        $this->model->moderation_yes($id);
+    }
+
     function up($refid, $id) {
         if (User::$user['level'] < 50) {
             Functions::redirect(Cms::setup('home'));

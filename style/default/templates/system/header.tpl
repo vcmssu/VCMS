@@ -13,7 +13,7 @@
         <title>{$title}</title>
         <link rel="shortcut icon" href="{$home}/style/{$skin}/images/favicon.ico" />
         <link rel="stylesheet" href="{$home}/style/{$skin}/css/bootstrap.min.css">
-        <link rel="stylesheet" href="{$home}/style/{$skin}/font-awesome-4.6.3/css/font-awesome.min.css">
+        <link rel="stylesheet" href="{$home}/style/{$skin}/font-awesome-4.7.0/css/font-awesome.min.css">
         <link rel="stylesheet" href="{$home}/style/{$skin}/css/style.css">
         <script src="{$home}/style/{$skin}/js/jquery.min.js"></script>
     </head>

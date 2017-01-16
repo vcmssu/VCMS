@@ -177,6 +177,55 @@ class NewsModel extends Base {
         SmartySingleton::instance()->display(SMARTY_TEMPLATE_LOAD . '/templates/modules/news/del.tpl');
     }
 
+    function mail($id) {
+        $row = DB::run("SELECT * FROM `news` WHERE `id`='" . $id . "'")->fetch(PDO::FETCH_ASSOC);
+
+        if ($_POST['ok']) {
+            $req = DB::run("SELECT * FROM `users` WHERE `news_send`='1' ORDER BY `id` ASC");
+            while ($rows = $req->fetch(PDO::FETCH_ASSOC)) {
+                SmartySingleton::instance()->assign(array(
+                    'rows' => $rows,
+                    'text' => Cms::bbcode($row['text'])
+                ));
+                // инициализируем класс
+                $mailer = new phpmailer();
+                //настройки
+                $mailer->Mailer = Cms::setup('sendmail');
+                $mailer->Host = Cms::setup('smtphost');
+                $mailer->Port = Cms::setup('smtpport');
+                $mailer->Username = Cms::setup('smtpusername');
+                $mailer->Password = Cms::setup('smtppassword');
+                // Устанавливаем тему письма
+                $mailer->Subject = Functions::esc($row['name']);
+                //задаем e-mail админа
+                $mailer->From = Cms::setup('emailadmin');
+                $mailer->ContentType = 'text/html';
+                // Задаем тело письма
+                $mailer->Body = SmartySingleton::instance()->fetch(SMARTY_TEMPLATE_LOAD . '/templates/mail/news.tpl');
+                // Добавляем адрес в список получателей
+                $mailer->AddAddress($rows['email'], $rows['login']);
+                $mailer->Send();
+            }
+
+            DB::run("UPDATE `news` SET `timemail`='" . Cms::realtime() . "' WHERE `id`='" . $row['id'] . "'");
+
+            if (Cms::setup('adminlogs') == 1) {
+                Cms::adminlogs('Новости', 'Рассылка новости ' . Cms::Input($row['name']));
+            } //пишем лог админа, если включено
+            Functions::redirect(Cms::setup('home') . '/news/' . $row['id'] . '-' . $row['translate']);
+        }
+
+        if ($_POST['close']) {
+            Functions::redirect(Cms::setup('home') . '/news/' . $row['id'] . '-' . $row['translate']);
+        }
+
+        SmartySingleton::instance()->assign(array(
+            'row' => $row,
+            'count' => DB::run("SELECT COUNT(*) FROM `users` WHERE `news_send`='1'")->fetchColumn()
+        ));
+        SmartySingleton::instance()->display(SMARTY_TEMPLATE_LOAD . '/templates/modules/news/mail.tpl');
+    }
+
     function edit_comments($id) {
         $row = DB::run("SELECT `news_comments`.*, (SELECT `name` FROM `news` WHERE `news`.`id`=`news_comments`.`id_news`) AS `name`,
             (SELECT `translate` FROM `news` WHERE `news`.`id`=`news_comments`.`id_news`) AS `translate` FROM `news_comments` WHERE `id`='" . $id . "'")->fetch(PDO::FETCH_ASSOC);

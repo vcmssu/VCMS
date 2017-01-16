@@ -9,6 +9,9 @@
             {if $user.level > 30}
                 <a href="{$home}/news/del/{$row.id}">Удалить</a> / 
             {/if}
+            {if $user.level > 40}
+                <a href="{$home}/news/mail/{$row.id}">Произвести рассылку</a> / 
+            {/if}
             <a href="{$home}/news/all">Все новости</a> / 
             <a href="{$home}/news/add">Добавить новость</a>
         </div>

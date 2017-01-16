@@ -250,11 +250,17 @@ class AdminUsersModel extends Base {
     }
 
     function balls() {
-
-
-        SmartySingleton::instance()->assign(array(
-            'users' => $a
-        ));
+        if (isset($_POST['ok'])) {
+            DB::run("UPDATE `setting` SET `value` = '" . Cms::Input($_POST['balls_add_theme']) . "' WHERE `name`='balls_add_theme'");
+            DB::run("UPDATE `setting` SET `value` = '" . Cms::Input($_POST['balls_add_post']) . "' WHERE `name`='balls_add_post'");
+            DB::run("UPDATE `setting` SET `value` = '" . Cms::Input($_POST['balls_add_blog']) . "' WHERE `name`='balls_add_blog'");
+            DB::run("UPDATE `setting` SET `value` = '" . Cms::Input($_POST['balls_add_library']) . "' WHERE `name`='balls_add_library'");
+            DB::run("UPDATE `setting` SET `value` = '" . Cms::Input($_POST['balls_add_download']) . "' WHERE `name`='balls_add_download'");
+            if (Cms::setup('adminlogs') == 1) {
+                Cms::adminlogs('Настройки сайта', 'Изменены параметры начисления баллов');
+            } //пишем лог админа, если включено
+            Functions::redirect(Cms::setup('adminpanel') . '/users/balls');
+        }
         SmartySingleton::instance()->display(SMARTY_TEMPLATE_LOAD . '/templates/admin/users/balls.tpl');
     }
 

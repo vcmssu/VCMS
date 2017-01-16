@@ -2,7 +2,7 @@
 <div class="fon">
     <div class="head">Пользователи</div>
     <div class="menu"><a href="{$home}{$panel}/users"><i class="fa fa-users"></i> Список пользователей ({$users|number})</a></div>
-    {*<div class="menu"><a href="{$home}{$panel}/users/balls"><i class="fa fa-money"></i> Управление баллами</a></div>*}
+    <div class="menu"><a href="{$home}{$panel}/users/balls"><i class="fa fa-money"></i> Управление баллами</a></div>
     <div class="menu"><a href="{$home}{$panel}/users/signup"><i class="fa fa-sign-in"></i>&nbsp; Регистрация</a></div>
     <div class="head">Журналирование</div>
     <div class="menu"><a href="{$home}{$panel}/logs"><i class="fa fa-lock"></i> Логи администрации ({$logs|number})</a></div>

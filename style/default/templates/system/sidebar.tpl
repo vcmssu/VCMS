@@ -2,7 +2,7 @@
     {if $user.id}
         <div class="pod">
             <div class="head">{$user.login|esc}</div>
-            <div class="foto"><img src="{$home}/files/{if $user.avatar}user/{$user.id}/{$user.avatar}{else}nophoto.jpg{/if}" class='img-responsive' /></div>
+            <div class="foto"><img src="{$home}/files/{if $user.avatar}user/{$user.id}/{$user.avatar}{else}nophoto.jpg{/if}" class="img-responsive" /></div>
             <a href="{$home}/profile/my"><div class="menu2"><i class="fa fa-user"></i> Редактировать анкету</div></a>
         </div>
     {else}
@@ -42,6 +42,7 @@
         <div class="pod">
             <div class="head">Полезное</div>
             <div class="menu"><a href="{$home}/download"><i class="fa fa-download"></i> Загрузки ({$download|number}{if $downloadnew > 0} <font color="red">+{$downloadnew|number}</font>{/if})</a></div>    
+            <div class="menu"><a href="{$home}/library"><i class="fa fa-file-text"></i> Библиотека ({$library|number})</a></div>
         </div>
         <div class="pod">
             <div class="head">Общение</div>

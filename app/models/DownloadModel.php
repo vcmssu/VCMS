@@ -6,8 +6,8 @@ class DownloadModel extends Base {
         if (!$id) {
             $count = DB::run("SELECT COUNT(*) FROM `category` WHERE `refid`='0'")->fetchColumn();
             if ($count > 0) {
-                $req = DB::run("SELECT `category`.*, (SELECT COUNT(1) FROM `files` WHERE `files`.`path` LIKE CONCAT(`category`.`path`, '%') AND `size` > '0' AND `id_file`='0') AS `count`,
-                (SELECT COUNT(1) FROM `files` WHERE `files`.`path` LIKE CONCAT(`category`.`path`, '%') AND `size` > '0' AND `time` > '" . intval(Cms::realtime() - Cms::setup('newfile')) . "' AND `id_file`='0') AS `countnew` FROM `category` WHERE `refid`='0' ORDER BY `realid` ASC LIMIT " . $this->page . ", " . $this->message);
+                $req = DB::run("SELECT `category`.*, (SELECT COUNT(1) FROM `files` WHERE `files`.`path` LIKE CONCAT(`category`.`path`, '%') AND `size` > '0' AND `id_file`='0' AND `user`='0') AS `count`,
+                (SELECT COUNT(1) FROM `files` WHERE `files`.`path` LIKE CONCAT(`category`.`path`, '%') AND `size` > '0' AND `time` > '" . intval(Cms::realtime() - Cms::setup('newfile')) . "' AND `id_file`='0' AND `user`='0') AS `countnew` FROM `category` WHERE `refid`='0' ORDER BY `realid` ASC LIMIT " . $this->page . ", " . $this->message);
                 while ($row = $req->fetch(PDO::FETCH_ASSOC)) {
                     $arrayrow[] = $row;
                 }
@@ -22,8 +22,8 @@ class DownloadModel extends Base {
         } else {
             $count = DB::run("SELECT COUNT(*) FROM `category` WHERE `refid`='" . $id . "'")->fetchColumn();
             if ($count > 0) {
-                $req = DB::run("SELECT `category`.*, (SELECT COUNT(1) FROM `files` WHERE `files`.`path` LIKE CONCAT(`category`.`path`, '%') AND `size` > '0' AND `id_file`='0') AS `count`,
-                (SELECT COUNT(1) FROM `files` WHERE `files`.`path` LIKE CONCAT(`category`.`path`, '%') AND `size` > '0' AND `time` > '" . intval(Cms::realtime() - Cms::setup('newfile')) . "' AND `id_file`='0') AS `countnew` FROM `category` WHERE `refid`='" . $id . "' ORDER BY `realid` ASC LIMIT " . $this->page . ", " . $this->message);
+                $req = DB::run("SELECT `category`.*, (SELECT COUNT(1) FROM `files` WHERE `files`.`path` LIKE CONCAT(`category`.`path`, '%') AND `size` > '0' AND `id_file`='0' AND `user`='0') AS `count`,
+                (SELECT COUNT(1) FROM `files` WHERE `files`.`path` LIKE CONCAT(`category`.`path`, '%') AND `size` > '0' AND `time` > '" . intval(Cms::realtime() - Cms::setup('newfile')) . "' AND `id_file`='0' AND `user`='0') AS `countnew` FROM `category` WHERE `refid`='" . $id . "' ORDER BY `realid` ASC LIMIT " . $this->page . ", " . $this->message);
                 while ($row = $req->fetch(PDO::FETCH_ASSOC)) {
                     $arrayrow[] = $row;
                 }
@@ -32,16 +32,16 @@ class DownloadModel extends Base {
             $cat = DB::run("SELECT * FROM `category` WHERE `id`='" . $id . "'")->fetch(PDO::FETCH_ASSOC);
 
             //файлы
-            $count_files = DB::run("SELECT COUNT(*) FROM `files` WHERE `refid`='" . $id . "'")->fetchColumn();
+            $count_files = DB::run("SELECT COUNT(*) FROM `files` WHERE `refid`='" . $id . "' AND `id_file`='0' AND `user`='0'")->fetchColumn();
             if ($count_files > 0) {
-                $req_files = DB::run("SELECT `files`.*, (SELECT COUNT(1) FROM `files_comments` WHERE `files_comments`.`id_file`=`files`.`id`) AS `comments` FROM `files` WHERE `refid`='" . $id . "' AND `id_file`='0' ORDER BY `id` DESC LIMIT " . $this->page . ", " . $this->message);
+                $req_files = DB::run("SELECT `files`.*, (SELECT COUNT(1) FROM `files_comments` WHERE `files_comments`.`id_file`=`files`.`id`) AS `comments` FROM `files` WHERE `refid`='" . $id . "' AND `id_file`='0' AND `user`='0' ORDER BY `id` DESC LIMIT " . $this->page . ", " . $this->message);
                 while ($row_files = $req_files->fetch(PDO::FETCH_ASSOC)) {
                     $arrayrow_files[] = $row_files;
                 }
             }
 
             //обработка загрузки файла
-            if ($_POST['upload'] && $this->user['level'] > 40) {
+            if ($_POST['upload'] && $this->user['level'] > 40 || $_POST['upload'] && $this->user['id'] && $cat['user'] == 1) {
 
                 if (mb_strlen(Cms::Input($_POST['names'])) > 250) {
                     $error_file .= 'Недопустимая длина названия файла!<br/>';
@@ -66,6 +66,24 @@ class DownloadModel extends Base {
                     $fsizefile = $_FILES['file']['size'];
                 }
 
+                if ($cat['user'] == 1 && $do_filefile) {
+                    // Список допустимых расширений файлов.
+                    $al_ext = explode(', ', $cat['type']);
+                    $ext = array_pop(explode(".", $originalfile));
+                    // Проверка файла на наличие только одного расширения
+                    if (count($ext) != 1) {
+                        $error_file .= 'Запрещенный формат файла ' . $originalfile . '!<br/>';
+                    }
+                    // Проверка допустимых расширений файлов
+                    if (!in_array($typ, $al_ext)) {
+                        $error_file .= 'Не допустимый формат файла ' . $originalfile . '!<br/>';
+                    }
+                    // Проверка на допустимый размер файла
+                    if ($fsizefile >= $cat['maxfilesize'] * 1024 * 1024) {
+                        $error_file .= 'Недопустимый вес файла ' . $originalfile . '!<br/>';
+                    }
+                }
+
                 if ($do_filefile == null) {
                     $error_file .= 'Вы не выбрали файл для загрузки!<br/>';
                 }
@@ -78,6 +96,7 @@ class DownloadModel extends Base {
                     $ifnamescreen = strtolower($_FILES['screen']['name']);
                     $typs = pathinfo($ifnamescreen, PATHINFO_EXTENSION);
                     $fnamescreen = Functions::passgen(25) . '.' . $typs;
+                    $fsizescreen = $_FILES['screen']['size'];
                 }
                 //обработка файла
                 if ($do_filescreen) {
@@ -96,6 +115,10 @@ class DownloadModel extends Base {
                     // Проверка допустимых расширений файлов
                     if (!in_array($ext[1], $al_ext)) {
                         $error_file .= 'Не допустимый формат картинки скриншота!<br/>';
+                    }
+                    // Проверка на допустимый размер файла
+                    if ($fsizescreen >= Cms::setup('filesize_photo') * 1024 * 1024) {
+                        $error_file .= 'Недопустимый вес скриншота!<br/>';
                     }
                 }
 
@@ -165,8 +188,43 @@ class DownloadModel extends Base {
                             $originalfile = preg_replace('/[-`~!#$%^&*()_=+\\\\|\\/\\[\\]{};:"\',<>?]+/', '', $originalfile);
                         }
 
-                        if (!empty($_POST['names'])) {
-                            DB::run("INSERT INTO `files` SET 
+                        if ($cat['user'] == 1 && $this->user['level'] < 40) {
+                            if (!empty($_POST['names'])) {
+                                DB::run("INSERT INTO `files` SET 
+                                `id_user` = '" . $this->user['id'] . "', 
+                                    `refid` = '" . $cat['id'] . "', 
+                                        `name` = '" . Cms::Input($_POST['names']) . "', 
+                                            `translate` = '" . Functions::name_replace(Cms::Input($_POST['names'])) . "', 
+                                                `text` = '" . Cms::Input($_POST['text']) . "', 
+                                                    `time` = '" . Cms::realtime() . "',
+                                                        `file` = '" . $ftp . "', 
+                                                            `type` = '" . $typ . "', 
+                                                                `size` = '" . Functions::size($fsizefile) . "', 
+                                                                    `path` = '" . $cat['path'] . "', 
+                                                                        `infolder` = '" . $cat['infolder'] . "',
+                                                                            `user` = '1',
+                                                                                `keywords` = '" . Cms::Input($_POST['keywords']) . "',
+                                                                                    `description` = '" . Cms::Input($_POST['description']) . "'");
+                            } else {
+                                DB::run("INSERT INTO `files` SET 
+                                `id_user` = '" . $this->user['id'] . "',
+                                    `refid` = '" . $cat['id'] . "', 
+                                        `name` = '" . substr(Cms::Input($originalfile), 0, -4) . "', 
+                                            `translate` = '" . substr(Cms::Input($fnamefile), 0, -3) . "', 
+                                                `text` = '" . Cms::Input($_POST['text']) . "', 
+                                                    `time` = '" . Cms::realtime() . "',
+                                                        `file` = '" . $ftp . "', 
+                                                            `type` = '" . $typ . "', 
+                                                                `size` = '" . Functions::size($fsizefile) . "', 
+                                                                    `path` = '" . $cat['path'] . "', 
+                                                                        `infolder` = '" . $cat['infolder'] . "',
+                                                                            `user` = '1',
+                                                                                `keywords` = '" . Cms::Input($_POST['keywords']) . "',
+                                                                                    `description` = '" . Cms::Input($_POST['description']) . "'");
+                            }
+                        } else if ($this->user['level'] > 40) {
+                            if (!empty($_POST['names'])) {
+                                DB::run("INSERT INTO `files` SET 
                                 `id_user` = '" . $this->user['id'] . "', 
                                     `refid` = '" . $cat['id'] . "', 
                                         `name` = '" . Cms::Input($_POST['names']) . "', 
@@ -180,8 +238,8 @@ class DownloadModel extends Base {
                                                                         `infolder` = '" . $cat['infolder'] . "',
                                                                             `keywords` = '" . Cms::Input($_POST['keywords']) . "',
                                                                                 `description` = '" . Cms::Input($_POST['description']) . "'");
-                        } else {
-                            DB::run("INSERT INTO `files` SET 
+                            } else {
+                                DB::run("INSERT INTO `files` SET 
                                 `id_user` = '" . $this->user['id'] . "',
                                     `refid` = '" . $cat['id'] . "', 
                                         `name` = '" . substr(Cms::Input($originalfile), 0, -4) . "', 
@@ -195,14 +253,15 @@ class DownloadModel extends Base {
                                                                         `infolder` = '" . $cat['infolder'] . "',
                                                                             `keywords` = '" . Cms::Input($_POST['keywords']) . "',
                                                                                 `description` = '" . Cms::Input($_POST['description']) . "'");
+                            }
                         }
-                        $fid = DB::$pdo->lastInsertId();
+                        $fid = DB::lastInsertId();
+                        ;
                     }
 
                     //загружаем и обрабатываем скриншот
                     if ((move_uploaded_file($_FILES["screen"]["tmp_name"], $cat['path'] . "" . $fnamescreen)) == true) {
                         $img = new SimpleImage();
-                        $img->load($cat['path'] . '' . $fnamescreen)->fit_to_width(Cms::setup('preview'))->save($cat['path'] . '' . $fnamescreen);
                         $img->load($cat['path'] . '' . $fnamescreen)->fit_to_width(Cms::setup('previewsmall'))->save($cat['path'] . 'small_' . $fnamescreen);
 
                         if (Cms::setup('watermark') == 1) {
@@ -212,11 +271,17 @@ class DownloadModel extends Base {
 
                         DB::run("UPDATE `files` SET `screen` = '" . $fnamescreen . "' WHERE `id` = '" . $fid . "'");
                     }
+                    
+                    Cms::addballs(Cms::setup('balls_add_download'));//прибавляем баллы
 
-                    if (Cms::setup('adminlogs') == 1) {
+                    if (Cms::setup('adminlogs') == 1 && $this->user['level'] > 1) {
                         Cms::adminlogs('ЗЦ', 'Добавление файла ' . Cms::Input($originalfile));
                     } //пишем лог админа, если включено
-                    Functions::redirect('/download/' . $id);
+                    if ($this->user['level'] > 40) {
+                        Functions::redirect('/download/' . $id);
+                    } else {
+                        Functions::redirect(Cms::setup('home') . '/profile/files');
+                    }
                 }
             }
 
@@ -352,6 +417,7 @@ class DownloadModel extends Base {
                 'cat' => $cat,
                 'error_file' => $error_file,
                 'error_mass' => $error_mass,
+                'moderation' => DB::run("SELECT COUNT(*) FROM `files` WHERE `user`='1'")->fetchColumn(),
                 'pagenav' => Functions::pagination(Cms::setup('home') . '/download/' . $id . '?', $this->page, $count_files, $this->message)
             ));
         }
@@ -364,6 +430,16 @@ class DownloadModel extends Base {
 
             if (mb_strlen(Cms::Input($_POST['text'])) > 250) {
                 $error .= 'Недопустимая длина описания категории!<br/>';
+            }
+
+            if ($_POST['user'] == 1) {
+                if (empty($_POST['type'])) {
+                    $error .= 'Вы не указали типы файлов для загрузки!<br/>';
+                }
+
+                if (empty($_POST['maxfilesize'])) {
+                    $error .= 'Вы не указали максимальный размер 1 файла для загрузки!<br/>';
+                }
             }
 
             //иконка к категории
@@ -406,15 +482,29 @@ class DownloadModel extends Base {
             }
 
             if (!isset($error)) {
-                DB::run("INSERT INTO `category` SET 
+                if ($_POST['user'] == 1) {
+                    DB::run("INSERT INTO `category` SET 
+                    `refid` = '" . $id . "', 
+                        `name` = '" . Cms::Input($_POST['name']) . "', 
+                            `translate` = '" . Functions::name_replace(Cms::Input($_POST['name'])) . "', 
+                                `text` = '" . Cms::Input($_POST['text']) . "',
+                                    `user` = '" . Cms::Input($_POST['user']) . "',
+                                        `type` = '" . Cms::Input($_POST['type']) . "',
+                                            `maxfilesize` = '" . Cms::Input($_POST['maxfilesize']) . "',
+                                                `keywords` = '" . Cms::Input($_POST['keywords']) . "',
+                                                    `description` = '" . Cms::Input($_POST['description']) . "'");
+                } else {
+                    DB::run("INSERT INTO `category` SET 
                     `refid` = '" . $id . "', 
                         `name` = '" . Cms::Input($_POST['name']) . "', 
                             `translate` = '" . Functions::name_replace(Cms::Input($_POST['name'])) . "', 
                                 `text` = '" . Cms::Input($_POST['text']) . "',
                                     `keywords` = '" . Cms::Input($_POST['keywords']) . "',
                                         `description` = '" . Cms::Input($_POST['description']) . "'");
+                }
 
-                $fid = DB::$pdo->lastInsertId();
+                $fid = DB::lastInsertId();
+                ;
 
                 DB::run("UPDATE `category` SET `realid` = '" . $fid . "' WHERE `id`='" . $fid . "'");
 
@@ -460,6 +550,7 @@ class DownloadModel extends Base {
             'arrayrow' => $arrayrow,
             'count_files' => $count_files,
             'arrayrow_files' => $arrayrow_files,
+            'moderation' => DB::run("SELECT COUNT(*) FROM `files` WHERE `user`='1'")->fetchColumn(),
             'pagenav_category' => Functions::pagination(Cms::setup('home') . '/download/' . $id . '?', $this->page, $count, $this->message)
         ));
         SmartySingleton::instance()->display(SMARTY_TEMPLATE_LOAD . '/templates/modules/download/index.tpl');
@@ -476,6 +567,16 @@ class DownloadModel extends Base {
 
             if (mb_strlen(Cms::Input($_POST['text'])) < 0 || mb_strlen(Cms::Input($_POST['text'])) > 250) {
                 $error .= 'Недопустимая длина описания категории!<br/>';
+            }
+
+            if ($_POST['user'] == 1) {
+                if (empty($_POST['type'])) {
+                    $error .= 'Вы не указали типы файлов для загрузки!<br/>';
+                }
+
+                if (empty($_POST['maxfilesize'])) {
+                    $error .= 'Вы не указали максимальный размер 1 файла для загрузки!<br/>';
+                }
             }
 
             //иконка к категории
@@ -518,13 +619,24 @@ class DownloadModel extends Base {
             }
 
             if (!isset($error)) {
-                DB::run("UPDATE `category` SET 
+                if ($row['user'] == 1) {
+                    DB::run("UPDATE `category` SET 
+                        `name` = '" . Cms::Input($_POST['name']) . "', 
+                            `translate` = '" . Functions::name_replace(Cms::Input($_POST['name'])) . "', 
+                                `text` = '" . Cms::Input($_POST['text']) . "',
+                                    `user` = '" . Cms::Input($_POST['user']) . "',
+                                        `type` = '" . Cms::Input($_POST['type']) . "',
+                                            `maxfilesize` = '" . Cms::Input($_POST['maxfilesize']) . "',
+                                                `keywords` = '" . Cms::Input($_POST['keywords']) . "',
+                                                    `description` = '" . Cms::Input($_POST['description']) . "' WHERE `id`='" . $row['id'] . "'");
+                } else {
+                    DB::run("UPDATE `category` SET 
                         `name` = '" . Cms::Input($_POST['name']) . "', 
                             `translate` = '" . Functions::name_replace(Cms::Input($_POST['name'])) . "', 
                                 `text` = '" . Cms::Input($_POST['text']) . "',
                                     `keywords` = '" . Cms::Input($_POST['keywords']) . "',
                                         `description` = '" . Cms::Input($_POST['description']) . "' WHERE `id`='" . $row['id'] . "'");
-
+                }
                 //загружаем и обрабатываем иконку
                 if ((move_uploaded_file($_FILES["icon"]["tmp_name"], $row['path'] . "/" . $ftp)) == true) {
                     Cms::DelFile($row['path'] . "/" . $row['icon']);
@@ -725,7 +837,6 @@ class DownloadModel extends Base {
                     //удаляем скриншот
                     Cms::DelFile($row['path'] . "" . $row['screen']);
                     $img = new SimpleImage();
-                    $img->load($row['path'] . '' . $fnamescreen)->fit_to_width(Cms::setup('preview'))->save($row['path'] . '' . $fnamescreen);
                     $img->load($row['path'] . '' . $fnamescreen)->fit_to_width(Cms::setup('previewsmall'))->save($row['path'] . 'small_' . $fnamescreen);
                     if (Cms::setup('watermark') == 1) {
                         Download::watermark($row['path'] . '' . $fnamescreen, 10);
@@ -983,13 +1094,12 @@ class DownloadModel extends Base {
                                                                             `keywords` = '" . Cms::Input($_POST['keywords']) . "',
                                                                                 `description` = '" . Cms::Input($_POST['description']) . "'");
                     }
-                    $fid = DB::$pdo->lastInsertId();
+                    $fid = DB::lastInsertId();
                 }
 
                 //загружаем и обрабатываем скриншот
                 if ((move_uploaded_file($_FILES["screen"]["tmp_name"], $row['path'] . "" . $fnamescreen)) == true) {
                     $img = new SimpleImage();
-                    $img->load($row['path'] . '' . $fnamescreen)->fit_to_width(Cms::setup('preview'))->save($row['path'] . '' . $fnamescreen);
                     $img->load($row['path'] . '' . $fnamescreen)->fit_to_width(Cms::setup('previewsmall'))->save($row['path'] . 'small_' . $fnamescreen);
 
                     if (Cms::setup('watermark') == 1) {
@@ -1154,10 +1264,10 @@ class DownloadModel extends Base {
     }
 
     function view($id) {
-        $row = DB::run("SELECT `files`.*, (SELECT COUNT(*) FROM `files_comments` WHERE `id_file`='" . $id . "') AS `count` FROM `files` WHERE `id`='" . $id . "'")->fetch(PDO::FETCH_ASSOC);
+        $row = DB::run("SELECT `files`.*, " . User::data('files') . ", (SELECT COUNT(*) FROM `files_comments` WHERE `id_file`='" . $id . "') AS `count` FROM `files` WHERE `id`='" . $id . "'")->fetch(PDO::FETCH_ASSOC);
         $onefile = DB::run("SELECT * FROM `files` WHERE `id`='" . $row['id_file'] . "'")->fetch(PDO::FETCH_ASSOC);
 
-        DB::run("UPDATE `files` SET `views` = '" . intval($row['views'] + 1) . "' WHERE `id` = '" . $row['id'] . "'");
+        DB::run("UPDATE `files` SET `views` = '" . Cms::Int($row['views'] + 1) . "' WHERE `id` = '" . $row['id'] . "'");
 
         if ($row['type'] == 'jpg' || $row['type'] == 'jpeg' || $row['type'] == 'png' || $row['type'] == 'gif') {
             SmartySingleton::instance()->assign('Img', getimagesize(str_replace('../', './', $row['path'] . '' . $row['file'])));
@@ -1172,12 +1282,12 @@ class DownloadModel extends Base {
                 SmartySingleton::instance()->assign('getFrameRate', $media->getFrameRate());
                 SmartySingleton::instance()->assign('getVideoCodec', $media->getVideoCodec());
                 SmartySingleton::instance()->assign('getBitRate', ceil(($media->getBitRate()) / 1024));
-                if (intval($media->getDuration()) > 3599) {
-                    $time = intval($media->getDuration() / 3600) . ":" . date('s', fmod($media->getDuration() / 60, 60)) . ":" . date('s', fmod($media->getDuration(), 3600));
-                } elseif (intval($media->getDuration()) > 59) {
-                    $time = intval($media->getDuration() / 60) . ":" . date('s', fmod($media->getDuration(), 60));
+                if (Cms::Int($media->getDuration()) > 3599) {
+                    $time = Cms::Int($media->getDuration() / 3600) . ":" . date('s', fmod($media->getDuration() / 60, 60)) . ":" . date('s', fmod($media->getDuration(), 3600));
+                } elseif (Cms::Int($media->getDuration()) > 59) {
+                    $time = Cms::Int($media->getDuration() / 60) . ":" . date('s', fmod($media->getDuration(), 60));
                 } else {
-                    $time = intval($media->getDuration()) . " сек.";
+                    $time = Cms::Int($media->getDuration()) . " сек.";
                 }
                 SmartySingleton::instance()->assign('time', $time);
             }
@@ -1241,11 +1351,11 @@ class DownloadModel extends Base {
     function comments($id) {
         $row = DB::run("SELECT * FROM `files` WHERE `id`='" . $id . "'")->fetch(PDO::FETCH_ASSOC);
 
-        Cms::comments('files_comments', 'id_file', $row['id'], $this->user['id'], 'captcha_comments_file', 'download/comments/'.$row['id']);
+        Cms::comments('files_comments', 'id_file', $row['id'], $this->user['id'], 'captcha_comments_file', 'download/comments/' . $row['id']);
 
         $count = DB::run("SELECT COUNT(*) FROM `files_comments` WHERE `id_file`='" . $row['id'] . "'")->fetchColumn();
         if ($count > 0) {
-            $req = DB::run("SELECT `files_comments`.*, ".User::data('files_comments')." FROM `files_comments` WHERE `id_file`='" . $row['id'] . "' ORDER BY `id` DESC LIMIT " . $this->page . ", " . $this->message);
+            $req = DB::run("SELECT `files_comments`.*, " . User::data('files_comments') . " FROM `files_comments` WHERE `id_file`='" . $row['id'] . "' ORDER BY `id` DESC LIMIT " . $this->page . ", " . $this->message);
             while ($rows = $req->fetch(PDO::FETCH_ASSOC)) {
                 $arrayrow[] = $rows;
                 $text[] = Cms::bbcode($rows['text']);
@@ -1313,7 +1423,6 @@ class DownloadModel extends Base {
         SmartySingleton::instance()->assign(array(
             'row' => $row,
             'text' => Cms::bbcode($row['text']),
-            'error' => $error,
             'pat' => Cms::BreadcrumbDownload($row['refid'])
         ));
         SmartySingleton::instance()->display(SMARTY_TEMPLATE_LOAD . '/templates/modules/download/del_comments.tpl');
@@ -1321,7 +1430,7 @@ class DownloadModel extends Base {
 
     function load($id) {
         $row = DB::run("SELECT * FROM `files` WHERE `id`='" . $id . "'")->fetch(PDO::FETCH_ASSOC);
-        DB::run("UPDATE `files` SET `loadcounts` = '" . intval($row['loadcounts'] + 1) . "', `timeload` = '" . Cms::realtime() . "' WHERE `id` = '" . $row['id'] . "'");
+        DB::run("UPDATE `files` SET `loadcounts` = '" . Cms::Int($row['loadcounts'] + 1) . "', `timeload` = '" . Cms::realtime() . "' WHERE `id` = '" . $row['id'] . "'");
         if (isset($_POST['ok'])) {
             if ($row['type'] == 'jpg' || $row['type'] == 'jpeg' || $row['type'] == 'png' || $row['type'] == 'gif') {
                 $pic = Cms::Input($_POST['pic']);
@@ -1342,9 +1451,9 @@ class DownloadModel extends Base {
     }
 
     function newfile() {
-        $count_files = DB::run("SELECT COUNT(*) FROM `files` WHERE `size` > '0' AND `time` > '" . intval(Cms::realtime() - Cms::setup('newfile')) . "' AND `id_file`='0'")->fetchColumn();
+        $count_files = DB::run("SELECT COUNT(*) FROM `files` WHERE `size` > '0' AND `time` > '" . intval(Cms::realtime() - Cms::setup('newfile')) . "' AND `id_file`='0' AND `user`='0'")->fetchColumn();
         if ($count_files > 0) {
-            $req_files = DB::run("SELECT `files`.*, (SELECT COUNT(1) FROM `files_comments` WHERE `files_comments`.`id_file`=`files`.`id`) AS `comments` FROM `files` WHERE `size` > '0' AND `time` > '" . intval(Cms::realtime() - Cms::setup('newfile')) . "' AND `id_file`='0' ORDER BY `id` DESC LIMIT " . $this->page . ", " . $this->message);
+            $req_files = DB::run("SELECT `files`.*, (SELECT COUNT(1) FROM `files_comments` WHERE `files_comments`.`id_file`=`files`.`id`) AS `comments` FROM `files` WHERE `size` > '0' AND `time` > '" . intval(Cms::realtime() - Cms::setup('newfile')) . "' AND `id_file`='0' AND `user`='0' ORDER BY `id` DESC LIMIT " . $this->page . ", " . $this->message);
             while ($row_files = $req_files->fetch(PDO::FETCH_ASSOC)) {
                 $arrayrow_files[] = $row_files;
             }
@@ -1353,15 +1462,16 @@ class DownloadModel extends Base {
         SmartySingleton::instance()->assign(array(
             'count_files' => $count_files,
             'arrayrow_files' => $arrayrow_files,
+            'moderation' => DB::run("SELECT COUNT(*) FROM `files` WHERE `user`='1'")->fetchColumn(),
             'pagenav' => Functions::pagination(Cms::setup('home') . '/download/new?', $this->page, $count_files, $this->message)
         ));
         SmartySingleton::instance()->display(SMARTY_TEMPLATE_LOAD . '/templates/modules/download/new.tpl');
     }
 
     function top() {
-        $count_files = DB::run("SELECT COUNT(*) FROM `files` WHERE `id_file`='0'")->fetchColumn();
+        $count_files = DB::run("SELECT COUNT(*) FROM `files` WHERE `id_file`='0' AND `user`='0'")->fetchColumn();
         if ($count_files > 0) {
-            $req_files = DB::run("SELECT `files`.*, (SELECT COUNT(1) FROM `files_comments` WHERE `files_comments`.`id_file`=`files`.`id`) AS `comments` FROM `files` WHERE `id_file`='0' ORDER BY `views` DESC, `loadcounts` DESC LIMIT " . $this->page . ", 100");
+            $req_files = DB::run("SELECT `files`.*, (SELECT COUNT(1) FROM `files_comments` WHERE `files_comments`.`id_file`=`files`.`id`) AS `comments` FROM `files` WHERE `id_file`='0' AND `user`='0' ORDER BY `views` DESC, `loadcounts` DESC LIMIT " . $this->page . ", 100");
             while ($row_files = $req_files->fetch(PDO::FETCH_ASSOC)) {
                 $arrayrow_files[] = $row_files;
             }
@@ -1370,6 +1480,7 @@ class DownloadModel extends Base {
         SmartySingleton::instance()->assign(array(
             'count_files' => $count_files,
             'arrayrow_files' => $arrayrow_files,
+            'moderation' => DB::run("SELECT COUNT(*) FROM `files` WHERE `user`='1'")->fetchColumn(),
             'pagenav' => Functions::pagination(Cms::setup('home') . '/download/top?', $this->page, $count_files, $this->message)
         ));
         SmartySingleton::instance()->display(SMARTY_TEMPLATE_LOAD . '/templates/modules/download/top.tpl');
@@ -1394,9 +1505,9 @@ class DownloadModel extends Base {
             }
 
             if (!isset($error)) {
-                $count_files = DB::run("SELECT COUNT(*) FROM `files` WHERE `id_file`='0' AND MATCH (name) AGAINST ('*" . $search . "*' IN BOOLEAN MODE)")->fetchColumn();
+                $count_files = DB::run("SELECT COUNT(*) FROM `files` WHERE `id_file`='0' AND `user`='0' AND MATCH (name) AGAINST ('*" . $search . "*' IN BOOLEAN MODE)")->fetchColumn();
                 if ($count_files > 0) {
-                    $req_files = DB::run("SELECT `files`.*, (SELECT COUNT(1) FROM `files_comments` WHERE `files_comments`.`id_file`=`files`.`id`) AS `comments` FROM `files` WHERE `id_file`='0' AND MATCH (name) AGAINST ('*" . $search . "*' IN BOOLEAN MODE) ORDER BY `id` DESC LIMIT " . $this->page . ", " . $this->message);
+                    $req_files = DB::run("SELECT `files`.*, (SELECT COUNT(1) FROM `files_comments` WHERE `files_comments`.`id_file`=`files`.`id`) AS `comments` FROM `files` WHERE `id_file`='0' AND `user`='0' AND MATCH (name) AGAINST ('*" . $search . "*' IN BOOLEAN MODE) ORDER BY `id` DESC LIMIT " . $this->page . ", " . $this->message);
                     while ($row_files = $req_files->fetch(PDO::FETCH_ASSOC)) {
                         $arrayrow_files[] = $row_files;
                     }
@@ -1409,9 +1520,37 @@ class DownloadModel extends Base {
             'search' => $search,
             'count_files' => $count_files,
             'arrayrow_files' => $arrayrow_files,
+            'moderation' => DB::run("SELECT COUNT(*) FROM `files` WHERE `user`='1'")->fetchColumn(),
             'pagenav' => Functions::pagination(Cms::setup('home') . '/download/search/' . $search . '?', $this->page, $count_files, $this->message)
         ));
         SmartySingleton::instance()->display(SMARTY_TEMPLATE_LOAD . '/templates/modules/download/search.tpl');
+    }
+
+    function moderation() {
+
+        $count_files = DB::run("SELECT COUNT(*) FROM `files` WHERE `user`='1'")->fetchColumn();
+        if ($count_files > 0) {
+            $req_files = DB::run("SELECT `files`.*, (SELECT COUNT(1) FROM `files_comments` WHERE `files_comments`.`id_file`=`files`.`id`) AS `comments` FROM `files` WHERE `user`='1' ORDER BY `id` DESC LIMIT " . $this->page . ", " . $this->message);
+            while ($row_files = $req_files->fetch(PDO::FETCH_ASSOC)) {
+                $arrayrow_files[] = $row_files;
+            }
+        }
+
+        SmartySingleton::instance()->assign(array(
+            'count_files' => $count_files,
+            'arrayrow_files' => $arrayrow_files,
+            'pagenav' => Functions::pagination(Cms::setup('home') . '/download/moderation?', $this->page, $count_files, $this->message)
+        ));
+        SmartySingleton::instance()->display(SMARTY_TEMPLATE_LOAD . '/templates/modules/download/moderation.tpl');
+    }
+
+    function moderation_yes($id) {
+        $row = DB::query("SELECT * FROM `files` WHERE `id`='" . $id . "'")->fetch(PDO::FETCH_ASSOC);
+        DB::run("UPDATE `files` SET `user` = '0' WHERE `id` = '" . $row['id'] . "'");
+        if (Cms::setup('adminlogs') == 1) {
+            Cms::adminlogs('ЗЦ', 'Промодерировал файл ' . Functions::esc($row['name']));
+        } //пишем лог админа, если включено
+        Functions::redirect(Recipe::getReferer());
     }
 
     function down($refid, $id) {

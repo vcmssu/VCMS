@@ -1,4 +1,26 @@
-<div class="head">{$title}</div>
+{capture name=level}
+    {if $row.level == 10}
+        [младший модератор]
+    {else if $row.level == 20}
+        [модератор]
+    {else if $row.level == 30}
+        [старший модератор]
+    {else if $row.level == 40}
+        [супер модератор]
+    {else if $row.level == 50}
+        [заместитель администратора]
+    {else if $row.level == 100}
+        [Админ]
+    {/if}
+{/capture}
+
+<div class="head">
+    {$title} {$smarty.capture.level}
+{if $row.ban == 1}
+    [Забанен до: {$row.bantime|date_format:"d.m.o, H:i"}
+   {if $row.ban == 1}{$row.banprichina|escape|esc}{/if}]
+{/if}
+</div>
 <div class="fon">
     {if $row.avatar}<div class="foto"><img src="{$home}/files/user/{$row.id}/{$row.avatar}" class="img-responsive"></div>{/if} 
     <div class="pod">
@@ -21,6 +43,9 @@
         <div class="menu"><a href="{$home}/active/news/comments/{$row.id}">Комментариев к новостям: {$row.news_comments|number}</a></div>
         <div class="menu"><a href="{$home}/active/download/comments/{$row.id}">Комментариев к файлам: {$row.files_comments|number}</a></div>
         <div class="menu"><a href="{$home}/active/blogs/comments/{$row.id}">Комментариев к блогам: {$row.blog_comments|number}</a></div>
+        <div class="menu"><a href="{$home}/active/gallery/{$row.id}">Фотографий в галерее: {$row.gallery_photo|number}</a></div>
+        <div class="menu"><a href="{$home}/active/library/{$row.id}">Статей в библиотеке: {$row.library|number}</a></div>
+        <div class="menu"><a href="{$home}/active/library/comments/{$row.id}">Комментариев к статьям: {$row.library_comments|number}</a></div>
     </div>
     {if $user.id && $row.id != $user.id}
         <div class="menu"><a href="{$home}/profile/mail/{$row.id}"><i class="fa fa-envelope"></i> Написать сообщение</a></div>

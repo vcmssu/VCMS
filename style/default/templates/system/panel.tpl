@@ -38,13 +38,14 @@
 
 {capture name=add_file}
     <p>Прикрепить файлы: <br/> <input type="file" name="file[]" multiple="true" class="form-control"/></p>
-    <p class="hidden-xs hidden-sm">Разрешенные типы файлов: <em>{$setup.filetype_forum}</em><br/>
+    <p>
         Допустимое кол-во файлов: <em>{$setup.filecount_forum}</em><br/>
-        Максимальный размер 1 файла: <em>{$setup.filesize_forum}Mb</em></p>
-    {/capture}
+        Максимальный размер 1 файла: <em>{$setup.filesize_forum}Mb</em>
+    </p>
+{/capture}
 
-    {capture name=smile}
-        {if $smile && $smarty.session.device == 'web'}
+{capture name=smile}
+    {if $smile && $smarty.session.device == 'web'}
         <div class="fon menu">    
             <div id="emoticons">
                 {foreach from=$smile item=onesmile} 

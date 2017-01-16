@@ -4,11 +4,14 @@ class UserModel extends Base {
 
     function index($id) {
         $row = DB::run("SELECT `users`.*, (SELECT COUNT(*) FROM `guest` WHERE `guest`.`id_user`=`users`.`id`) AS `guest`,
-                        (SELECT COUNT(*) FROM `files` WHERE `files`.`id_user`=`users`.`id`) AS `download`,
+                        (SELECT COUNT(*) FROM `files` WHERE `files`.`id_user`=`users`.`id` AND `id_file`='0'  AND `user`='0') AS `download`,
                         (SELECT COUNT(*) FROM `blog` WHERE `blog`.`id_user`=`users`.`id`) AS `blog`,
                         (SELECT COUNT(*) FROM `news_comments` WHERE `news_comments`.`id_user`=`users`.`id`) AS `news_comments`,
                         (SELECT COUNT(*) FROM `files_comments` WHERE `files_comments`.`id_user`=`users`.`id`) AS `files_comments`,
-                        (SELECT COUNT(*) FROM `blog_comments` WHERE `blog_comments`.`id_user`=`users`.`id`) AS `blog_comments` FROM `users` WHERE `id`='" . $id . "'")->fetch(PDO::FETCH_ASSOC);
+                        (SELECT COUNT(*) FROM `blog_comments` WHERE `blog_comments`.`id_user`=`users`.`id`) AS `blog_comments`,
+                        (SELECT COUNT(*) FROM `gallery_photo` WHERE `gallery_photo`.`id_user`=`users`.`id`) AS `gallery_photo`,
+                        (SELECT COUNT(*) FROM `library` WHERE `library`.`id_user`=`users`.`id`) AS `library`,
+                        (SELECT COUNT(*) FROM `library_comments` WHERE `library_comments`.`id_user`=`users`.`id`) AS `library_comments` FROM `users` WHERE `id`='" . $id . "'")->fetch(PDO::FETCH_ASSOC);
 
         SmartySingleton::instance()->assign(array(
             'row' => $row,
@@ -33,6 +36,23 @@ class UserModel extends Base {
             'pagenav' => Functions::pagination('/users?', $this->page, $count, $this->message)
         ));
         SmartySingleton::instance()->display(SMARTY_TEMPLATE_LOAD . '/templates/modules/user/users.tpl');
+    }
+    
+    function users_admin($id) {
+        $count = DB::run("SELECT COUNT(*) FROM `users` WHERE `level`>'1'")->fetchColumn();
+        if ($count > 0) {
+            $req = DB::run("SELECT * FROM `users` WHERE `level`>'1' ORDER BY `level` DESC LIMIT " . $this->page . ", " . $this->message);
+            while ($row = $req->fetch(PDO::FETCH_ASSOC)) {
+                $arrayrow[] = $row;
+            }
+        }
+
+        SmartySingleton::instance()->assign(array(
+            'count' => $count,
+            'arrayrow' => $arrayrow,
+            'pagenav' => Functions::pagination('/users/admin?', $this->page, $count, $this->message)
+        ));
+        SmartySingleton::instance()->display(SMARTY_TEMPLATE_LOAD . '/templates/modules/user/users_admin.tpl');
     }
 
     function login() {
@@ -127,7 +147,8 @@ class UserModel extends Base {
                                         `date_last` =  '" . Cms::realtime() . "', 
                                             `activation` =  '" . $activation . "'");
 
-                $fid = DB::$pdo->lastInsertId();
+                $fid = DB::lastInsertId();
+                ;
 
                 //создаём нужные папки
                 mkdir(HOME . '/files/user/' . $fid);

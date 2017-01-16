@@ -25,7 +25,7 @@ class Cms {
             'keywords' => $keywords,
             'description' => $description,
             'smile' => self::smile(),
-            'lastthems' => self::lastthems(3),
+            'lastthems' => self::lastthems(),
             'blog' => DB::run("SELECT COUNT(*) FROM `blog`")->fetchColumn(),
             'guest' => DB::run("SELECT COUNT(*) FROM `guest`")->fetchColumn(),
             'users' => DB::run("SELECT COUNT(*) FROM `users`")->fetchColumn(),
@@ -33,10 +33,11 @@ class Cms {
             'gallery_photo' => DB::run("SELECT COUNT(*) FROM `gallery_photo`")->fetchColumn(),
             'tema' => DB::run("SELECT COUNT(*) FROM `tema`")->fetchColumn(),
             'post' => DB::run("SELECT COUNT(*) FROM `post`")->fetchColumn(),
-            'download' => DB::run("SELECT COUNT(*) FROM `files`")->fetchColumn(),
-            'downloadnew' => DB::run("SELECT COUNT(*) FROM `files` WHERE `size` > '0' AND `time` > '" . intval(self::realtime() - self::setup('newfile')) . "' AND `id_file`='0'")->fetchColumn(),
+            'download' => DB::run("SELECT COUNT(*) FROM `files` WHERE `id_file`='0' AND `user`='0'")->fetchColumn(),
+            'downloadnew' => DB::run("SELECT COUNT(*) FROM `files` WHERE `size` > '0' AND `time` > '" . intval(self::realtime() - self::setup('newfile')) . "' AND `id_file`='0' AND `user`='0'")->fetchColumn(),
             'usersonline' => DB::run("SELECT COUNT(*) FROM `online` WHERE `type` = '1'")->fetchColumn(),
             'guestonline' => DB::run("SELECT COUNT(*) FROM `online` WHERE `type` = '2'")->fetchColumn(),
+            'library' => DB::run("SELECT COUNT(*) FROM `library`")->fetchColumn(),
             'adsheadindex' => Ads::head_index(),
             'adsheadnoindex' => Ads::head_no_index(),
             'adshead' => Ads::head(),
@@ -144,6 +145,10 @@ class Cms {
         return $txt; //возвращаем переменную
     }
 
+    function Int($txt) {
+        return abs(intval($txt));
+    }
+
     //логи админа
     function adminlogs($modul, $text) {
         DB::run("INSERT INTO `adminlogs` SET 
@@ -196,6 +201,21 @@ class Cms {
         return $pat;
     }
 
+    //хлебные крошки для библиотеки
+    function BreadcrumbLibrary($id) {
+        $nadir = $id;
+        while ($nadir != "") {
+            $dnew = DB::run("SELECT * FROM `library_category` WHERE `id` = '" . $nadir . "'");
+            $dnew1 = $dnew->fetch(PDO::FETCH_ASSOC);
+            if ($dnew1['id']) {
+                $pat[] = ' / <a href="' . self::setup('home') . '/library/' . $dnew1['id'] . '">' . Functions::esc($dnew1['name']) . '</a> ';
+            }
+            $nadir = $dnew1['refid'];
+        }
+        krsort($pat);
+        return $pat;
+    }
+
     //автоочистка
     function AutoClear() {
         //очищаем антифлуд
@@ -212,7 +232,7 @@ class Cms {
         if (self::setup('autoclear_guest') > 0 && DB::run("DELETE FROM `guest` WHERE `time` < '" . intval(self::realtime() - 86400 * self::setup('autoclear_guest')) . "'")) {
             DB::run("OPTIMIZE TABLE `guest`");
         }
-        
+
         //снимаем бан
         if (DB::run("SELECT `ban`, `bantime` FROM `users` WHERE `bantime` < '" . intval(self::realtime()) . "'")) {
             DB::run("UPDATE `users` SET `ban` = '0' WHERE `bantime` < '" . intval(self::realtime()) . "'");
@@ -298,9 +318,35 @@ class Cms {
         ));
     }
 
+    //голосование
+    function addrating($tablefirst, $table, $ref, $user) {
+        if (isset($_POST['ok']) && $user) {
+            if (DB::run("SELECT COUNT(*) FROM `$table` WHERE `refid`='" . $ref['id'] . "' AND `id_user`='" . $user . "'")->fetchColumn() == 0) {
+                DB::run("INSERT INTO `$table` SET 
+                    `refid`='" . $ref['id'] . "', 
+                        `id_user`='" . $user . "', 
+                           `rating`='" . intval($_POST['rating']) . "', 
+                               `time`='" . self::realtime() . "'");
+                //вычисляем рейтинг
+                $count = DB::run("SELECT COUNT(*) FROM `$table` WHERE `refid`='" . $ref['id'] . "'")->fetchColumn();
+                $countsum = DB::run("SELECT SUM(`rating`) FROM `$table` WHERE `refid`='" . $ref['id'] . "'")->fetchColumn();
+                $ratingall = $countsum / $count;
+
+                DB::run("UPDATE `$tablefirst` SET `rating` = '" . round($ratingall, 2) . "' WHERE `id`='" . intval($ref['id']) . "'");
+            }
+        }
+    }
+
     //добавляем 1 просмотр к выбранному модулю
     function addviews($table, $refid) {
         DB::run("UPDATE `$table` SET `views` = '" . intval($refid['views'] + 1) . "' WHERE `id` = '" . $refid['id'] . "'");
+    }
+
+    //прибавляем баллы
+    function addballs($module) {
+        if (User::$user['id']) {
+            DB::run("UPDATE `users` SET `balls` = '" . self::Int(User::$user['balls'] + $module) . "' WHERE `id` = '" . User::$user['id'] . "'");
+        }
     }
 
     //новые темы на форуме

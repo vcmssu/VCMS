@@ -2,6 +2,12 @@
 
 class Functions {
 
+    public static function position($text, $chr) {
+        $result = mb_strpos($text, $chr);
+
+        return $result !== false ? $result : 100;
+    }
+
     function seokeywords($contents, $symbol = 5, $words = 35) {
         $contents = preg_replace(array("'<[\/\!]*?[^<>]*?>'si", "'([\r\n])[\s]+'si", "'&[a-z0-9]{1,6};'si", "'( +)'si"), array("", "\\1 ", " ", " "), strip_tags($contents));
         $rearray = array("~", "!", "@", "#", "$", "%", "^", "&", "*", "(", ")", "_", "+",
@@ -83,34 +89,6 @@ class Functions {
         }
 
         return $content;
-    }
-
-    function count_files($path) {
-        /* Примечание, убедитесь, что путь содержит конечный слэш. */
-
-        $skolko_failov = 0;
-
-        $papka_handle = opendir($path);
-
-        if (!$papka_handle) {
-            return -1;
-        }
-
-        while ($file = readdir($papka_handle)):
-            if ($file == '..' || $file == '.') {
-                continue;
-            }
-
-            if (is_dir($path . $file)):
-                $skolko_failov += count_files($path . $file . DIRECTORY_SEPARATOR);
-            else:
-                $skolko_failov++; // - увеличиваем счетчик количества файлов.
-            endif;
-        endwhile;
-
-        closedir($papka_handle);
-
-        return $skolko_failov;
     }
 
     //функция для определения размера папки
@@ -618,6 +596,36 @@ class Functions {
             }
         }
         return $str;
+    }
+
+    function pagination_text($total, $page, $url) {
+        if ($page != 1) {
+            $pervpage = ' <li><a href= "' . $url . 'page=' . ($page - 1) . '"><i class="fa fa-angle-left"></i></a></li> ';
+        }
+// Проверяем нужны ли стрелки вперед 
+        if ($page != $total) {
+            $nextpage = ' <li><a href="' . $url . 'page=' . ($page + 1) . '"><i class="fa fa-angle-right"></i></a></li>';
+        }
+        if ($page - 4 > 0) {
+            $first = '<li><a href="' . $url . 'page=1">1</a><a>...</a></li>';
+        }
+        if ($page + 4 <= $total) {
+            $last = '<li><a>...</a><a href="' . $url . 'page=' . $total . '">' . $total . '</a></li>';
+        }
+// Находим две ближайшие станицы с обоих краев, если они есть 
+        if ($page - 2 > 0) {
+            $page2left = ' <li><a href= "' . $url . 'page=' . ($page - 2) . '">' . ($page - 2) . '</a></li> ';
+        }
+        if ($page - 1 > 0) {
+            $page1left = '<li><a href= "' . $url . 'page=' . ($page - 1) . '">' . ($page - 1) . '</a></li> ';
+        }
+        if ($page + 2 <= $total) {
+            $page2right = ' <li><a href= "' . $url . 'page=' . ($page + 2) . '">' . ($page + 2) . '</a></li>';
+        }
+        if ($page + 1 <= $total) {
+            $page1right = ' <li><a href="' . $url . 'page=' . ($page + 1) . '">' . ($page + 1) . '</a></li>';
+        }
+        return $pervpage . $first . $page2left . $page1left . '<li class="active"><a>' . $page . '</a></li>' . $page1right . $page2right . $last . $nextpage;
     }
 
 }

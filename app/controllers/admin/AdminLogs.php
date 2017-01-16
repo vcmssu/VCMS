@@ -14,6 +14,12 @@ class AdminLogs {
         $this->model->index();
         Cms::footer();
     }
+    
+    function clear() {
+        Cms::header('Логи администрации');
+        $this->model->clear();
+        Cms::footer();
+    }
 
     function notice() {
         Cms::header('Уведомления пользователей');

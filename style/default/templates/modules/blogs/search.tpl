@@ -20,6 +20,7 @@
         <div class="alert alert-danger margin-top-10">{$error}</div>
     {/if}
     {if $count > 0 && !isset($error) && $search}
+        <div class="margin-top-10 alert alert-info">Результаты поиска по запросу: <b>{$search|escape|esc}</b></div>
         {foreach from=$arrayrow item=rows}
             <div class="list">
                 <a href="{$home}/blogs/{$rows.refid}/{$rows.id}-{$rows.translate}" class="title" title="Просмотреть">{$rows.name|esc|escape}</a> ({$rows.time|times})
