@@ -15,12 +15,14 @@ class BBcode {
             '/\[size=(.+)](.+)\[\/size]/isU' => '<span style="font-size:$1px">$2</span>',
             '/\[center](.+)\[\/center]/isU' => '<div style="text-align: center;">$1</div>',
             '/\[color=(.+)](.+)\[\/color]/isU' => '<span style="color:$1">$2</span>',
-            '/^[http|https]+:\/\/(?:www\.)?(?:youtube.com)\/(?:watch\?(?=.*v=([\w\-]+))(?:\S+)?|([\w\-]+))$/' => '<iframe width="100%" height="320" src="http://www.youtube.com/embed/$1" frameborder="0" allowfullscreen></iframe>',
-            '/[http|https]+:\/\/(?:www\.|)youtu\.be\/([a-zA-Z0-9_\-]+)/i' => '<iframe width="100%" height="320" src="http://www.youtube.com/embed/$1" frameborder="0" allowfullscreen></iframe>',
-            '/(?:https:\/\/)?(?:www\.)?vimeo\.com\/(\d{1,10})/i' => '<iframe width="100%" height="320" src="http://player.vimeo.com/video/$1" frameborder="0" allowfullscreen mozallowfullscreen webkitallowfullscreen></iframe>',
-            '/[http|https]+:\/\/(?:www\.|)rutube\.ru\/video\/embed\/([a-zA-Z0-9_\-]+)/i' => '<iframe width="100%" height="320" src="//rutube.ru/play/embed/$1" frameborder="0" webkitAllowFullScreen mozallowfullscreen allowfullscreen></iframe>',
-            '/[http|https]+:\/\/(?:www\.|)rutube\.ru\/tracks\/([a-zA-Z0-9_\-]+)(&.+)?/i' => '<iframe width="100%" height="320" src="//rutube.ru/play/embed/$1" frameborder="0" webkitAllowFullScreen mozallowfullscreen allowfullscreen></iframe>',
-            '/[http|https]+:\/\/(?:www\.|)rutube\.ru\/video\/([a-zA-Z0-9_\-]+)\//i' => '<iframe width="100%" height="320" src="//rutube.ru/play/embed/$1" frameborder="0" webkitAllowFullScreen mozallowfullscreen allowfullscreen></iframe>');
+            '/^[http|https]+:\/\/(?:www\.)?(?:youtube.com)\/(?:watch\?(?=.*v=([\w\-]+))(?:\S+)?|([\w\-]+))$/' => '<iframe width="100%" height="480" src="http://www.youtube.com/embed/$1" frameborder="0" allowfullscreen></iframe>',
+            '/[http|https]+:\/\/(?:www\.|)youtu\.be\/([a-zA-Z0-9_\-]+)/i' => '<iframe width="100%" height="480" src="http://www.youtube.com/embed/$1" frameborder="0" allowfullscreen></iframe>',
+            '/(?:https:\/\/)?(?:www\.)?vimeo\.com\/(\d{1,10})/i' => '<iframe width="100%" height="480" src="http://player.vimeo.com/video/$1" frameborder="0" allowfullscreen mozallowfullscreen webkitallowfullscreen></iframe>',
+            '/[http|https]+:\/\/(?:www\.|)rutube\.ru\/video\/embed\/([a-zA-Z0-9_\-]+)/i' => '<iframe width="100%" height="480" src="//rutube.ru/play/embed/$1" frameborder="0" webkitAllowFullScreen mozallowfullscreen allowfullscreen></iframe>',
+            '/[http|https]+:\/\/(?:www\.|)rutube\.ru\/tracks\/([a-zA-Z0-9_\-]+)(&.+)?/i' => '<iframe width="100%" height="480" src="//rutube.ru/play/embed/$1" frameborder="0" webkitAllowFullScreen mozallowfullscreen allowfullscreen></iframe>',
+            '/[http|https]+:\/\/(?:www\.|)rutube\.ru\/video\/([a-zA-Z0-9_\-]+)\//i' => '<iframe width="100%" height="480" src="//rutube.ru/play/embed/$1" frameborder="0" webkitAllowFullScreen mozallowfullscreen allowfullscreen></iframe>',
+            '#\[\*](.+?)\[/\*]#is' => '<span class="bblist">$1</span>',
+            '#\[spoiler=(.+?)](.+?)\[/spoiler]#is' => '<div><div class="spoilerhead" style="cursor:pointer;" onclick="var _n=this.parentNode.getElementsByTagName(\'div\')[1];if(_n.style.display==\'none\'){_n.style.display=\'\';}else{_n.style.display=\'none\';}">$1 (+/-)</div><div class="spoilerbody" style="display:none">$2</div></div>');
         return preg_replace(array_keys($bbcode), array_values($bbcode), $text);
     }
 
@@ -64,7 +66,9 @@ class BBcode {
             '/(?:https:\/\/)?(?:www\.)?vimeo\.com\/(\d{1,10})/i' => '',
             '/[http|https]+:\/\/(?:www\.|)rutube\.ru\/video\/embed\/([a-zA-Z0-9_\-]+)/i' => '',
             '/[http|https]+:\/\/(?:www\.|)rutube\.ru\/tracks\/([a-zA-Z0-9_\-]+)(&.+)?/i' => '',
-            '/[http|https]+:\/\/(?:www\.|)rutube\.ru\/video\/([a-zA-Z0-9_\-]+)\//i' => '');
+            '/[http|https]+:\/\/(?:www\.|)rutube\.ru\/video\/([a-zA-Z0-9_\-]+)\//i' => '',
+            '#\[\*](.+?)\[/\*]#is' => '',
+            '#\[spoiler=(.+?)](.+?)\[/spoiler]#is' => '');
         return preg_replace(array_keys($bbcode), array_values($bbcode), $text);
     }
 

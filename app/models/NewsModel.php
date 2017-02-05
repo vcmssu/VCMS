@@ -37,7 +37,7 @@ class NewsModel extends Base {
     function comments($id) {
         $row = DB::run("SELECT * FROM `news` WHERE `id`='" . $id . "'")->fetch(PDO::FETCH_ASSOC);
 
-        Cms::comments('news_comments', 'id_news', $row['id'], $this->user['id'], 'captcha_comments_news', 'news/comments/' . $row['id']);
+        Cms::comments('news', 'news_comments', 'id_news', $row['id'], $this->user['id'], 'captcha_comments_news', 'news/comments/' . $row['id']);
 
         $count = DB::run("SELECT COUNT(*) FROM `news_comments` WHERE `id_news`='" . $row['id'] . "'")->fetchColumn();
         if ($count > 0) {

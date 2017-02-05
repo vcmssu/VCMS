@@ -21,7 +21,7 @@
                 <a href="{$home}/forum/{$forum.id}/{$row.id}/{$rows.id}?page={$starts.$k}#{$rows.id_post_last}" title="Последнее сообщение"><i class="fa fa-angle-double-right"></i></a>
                 <a href="{$home}/id{$rows.id_user_last}">{$rows.login|escape|esc}</a>
                 <span class="pull-right hidden-xs hidden-sm">{$rows.time|times}</span>
-                <span class="menu visible-xs">{$rows.time|times}</span>
+                <span class="visible-xs">{$rows.time|times}</span>
             </div>
         {/foreach}
     {else}

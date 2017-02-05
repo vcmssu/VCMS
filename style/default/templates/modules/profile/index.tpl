@@ -14,6 +14,7 @@
         <div class="head">Личное</div>
         <div class="menu"><a href="{$home}/profile/my"><i class="fa fa-user"></i> Анкета</a> | <a href="{$home}/id{$user.id}"> Просмотреть</a></div>
         <div class="menu"><a href="{$home}/profile/setup"><i class="fa fa-user-secret"></i> Мои настройки</a></div>
+        <div class="menu"><a href="{$home}/profile/setup/notice"><i class="fa fa-user-md"></i> Настройка уведомлений</a></div>
         <div class="menu"><a href="{$home}/profile/security"><i class="fa fa-lock"></i> Настройки безопасности</a></div>
         <div class="menu"><a href="{$home}/profile/bookmark"><i class="fa fa-bookmark"></i> Закладки ({$bookmark|number})</a></div>
         <div class="menu"><a href="{$home}/profile/blacklist"><i class="fa fa-black-tie"></i> Черный список ({$blacklist|number})</a></div>

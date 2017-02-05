@@ -271,8 +271,8 @@ class DownloadModel extends Base {
 
                         DB::run("UPDATE `files` SET `screen` = '" . $fnamescreen . "' WHERE `id` = '" . $fid . "'");
                     }
-                    
-                    Cms::addballs(Cms::setup('balls_add_download'));//прибавляем баллы
+
+                    Cms::addballs(Cms::setup('balls_add_download')); //прибавляем баллы
 
                     if (Cms::setup('adminlogs') == 1 && $this->user['level'] > 1) {
                         Cms::adminlogs('ЗЦ', 'Добавление файла ' . Cms::Input($originalfile));
@@ -504,7 +504,6 @@ class DownloadModel extends Base {
                 }
 
                 $fid = DB::lastInsertId();
-                ;
 
                 DB::run("UPDATE `category` SET `realid` = '" . $fid . "' WHERE `id`='" . $fid . "'");
 
@@ -1351,7 +1350,7 @@ class DownloadModel extends Base {
     function comments($id) {
         $row = DB::run("SELECT * FROM `files` WHERE `id`='" . $id . "'")->fetch(PDO::FETCH_ASSOC);
 
-        Cms::comments('files_comments', 'id_file', $row['id'], $this->user['id'], 'captcha_comments_file', 'download/comments/' . $row['id']);
+        Cms::comments('files', 'files_comments', 'id_file', $row['id'], $this->user['id'], 'captcha_comments_file', 'download/comments/' . $row['id'], 'files');
 
         $count = DB::run("SELECT COUNT(*) FROM `files_comments` WHERE `id_file`='" . $row['id'] . "'")->fetchColumn();
         if ($count > 0) {

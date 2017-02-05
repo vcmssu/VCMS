@@ -4,6 +4,7 @@
 $router->add('profile', '/profile', 'ProfileController:index');
 $router->add('profile_my', '/profile/my', 'ProfileController:my', 'GET|POST');
 $router->add('profile_setup', '/profile/setup', 'ProfileController:setup', 'GET|POST');
+$router->add('profile_setup_notice', '/profile/setup/notice', 'ProfileController:setup_notice', 'GET|POST');
 $router->add('profile_security', '/profile/security', 'ProfileController:security', 'GET|POST');
 $router->add('profile_history', '/profile/history', 'ProfileController:history');
 $router->add('profile_notice', '/profile/notice', 'ProfileController:notice');

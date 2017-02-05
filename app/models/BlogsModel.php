@@ -385,7 +385,7 @@ class BlogsModel extends Base {
     function comments($id) {
         $row = DB::run("SELECT `blog`. * , (SELECT `name` FROM `blog_category` WHERE `blog_category`.`id` = blog.`refid` ) AS `namecat` FROM `blog` WHERE `id`='" . $id . "'")->fetch(PDO::FETCH_ASSOC);
 
-        Cms::comments('blog_comments', 'id_post', $row['id'], $this->user['id'], 'captcha_comments_blog', 'blogs/comments/' . $row['id'], $row['refid']);
+        Cms::comments('blog', 'blog_comments', 'id_post', $row['id'], $this->user['id'], 'captcha_comments_blog', 'blogs/comments/' . $row['id'], 'blog', $row['refid']);
 
         $count = DB::run("SELECT COUNT(*) FROM `blog_comments` WHERE `id_post`='" . $row['id'] . "'")->fetchColumn();
         if ($count > 0) {

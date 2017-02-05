@@ -379,7 +379,7 @@ class LibraryModel extends Base {
     function comments($id) {
         $row = DB::run("SELECT * FROM `library` WHERE `id`='" . $id . "'")->fetch(PDO::FETCH_ASSOC);
 
-        Cms::comments('library_comments', 'refid', $row['id'], $this->user['id'], 'captcha_comments_library', 'library/comments/' . $row['id']);
+        Cms::comments('library', 'library_comments', 'refid', $row['id'], $this->user['id'], 'captcha_comments_library', 'library/comments/' . $row['id'], 'library');
 
         $count = DB::run("SELECT COUNT(*) FROM `library_comments` WHERE `refid`='" . $row['id'] . "'")->fetchColumn();
         if ($count > 0) {

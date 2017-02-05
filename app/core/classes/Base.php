@@ -4,7 +4,7 @@ class Base {
 
     function __construct() {
         $this->user = User::auth();
-        $this->page = isset($_REQUEST['page']) ? intval($_REQUEST['page']) : 0;
+        $this->page = isset($_REQUEST['page']) ? Cms::Int($_REQUEST['page']) : 0;
 
         if ($this->user['id']) {
             $this->message = $this->user['message'];
@@ -13,7 +13,7 @@ class Base {
         }
 
         //если забанен
-        if ($this->user['ban'] == 1 && $this->user['bantime'] > Cms::realtime() && $_SERVER['REQUEST_URI'] != '/user/ban' && $_SERVER['REQUEST_URI'] != '/user/exit') {
+        if ($this->user['ban'] == 1 && $this->user['bantime'] > Cms::realtime() && Cms::Input($_SERVER['REQUEST_URI']) != '/user/ban' && Cms::Input($_SERVER['REQUEST_URI']) != '/user/exit') {
             Functions::redirect(Cms::setup('home') . '/user/ban');
         }
     }

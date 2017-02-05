@@ -332,3 +332,25 @@ blockquote.pull-right .small:after {
     width:25%;
     height:25%;
 }
+
+.bblist {
+    color: #4A5663;
+    background: transparent url(../images/dot.gif) no-repeat left;
+    padding: 0px 0px 0px 10px;
+}
+
+.spoilerhead {
+	background: #E8E8F2;
+	color: #211F67;
+	padding: 3px;
+	border: 1px solid #9898AD;
+}
+
+.spoilerbody {
+	background: #FAFAFC;
+	border: 1px solid #AFAFC4;
+	border-top: none;
+	padding: 4px;
+	color: #333;
+	border-radius: 0px 0px 3px 3px;
+}

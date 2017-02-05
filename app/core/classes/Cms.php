@@ -269,7 +269,14 @@ class Cms {
     }
 
     //добавление комментария
-    function comments($table, $ref, $refid, $user, $captcha, $url, $blog = false) {
+    function comments($tablefirst, $table, $ref, $refid, $user, $captcha, $url, $type = false, $blog = false) {
+        if($type){
+        $row = DB::run("SELECT `$tablefirst`.*,
+                        (SELECT `notice_blog` FROM `users` WHERE `users`.`id`=`$tablefirst`.`id_user`) AS `blog`,
+                        (SELECT `notice_files` FROM `users` WHERE `users`.`id`=`$tablefirst`.`id_user`) AS `files`,
+                        (SELECT `notice_library` FROM `users` WHERE `users`.`id`=`$tablefirst`.`id_user`) AS `library` FROM `$tablefirst` WHERE `id`='" . $refid . "'")->fetch(PDO::FETCH_ASSOC);
+        }
+        
         if (isset($_POST['ok']) && $user) {
 
             if (mb_strlen(self::Input($_POST['text'])) < 2 || mb_strlen(self::Input($_POST['text'])) > 5000) {
@@ -301,13 +308,26 @@ class Cms {
                                `time`='" . self::realtime() . "'");
                 } else {
                     DB::run("INSERT INTO `$table` SET 
-                `$ref`='" . $refid . "', 
-                    `id_user`='" . $user . "', 
-                       `text`='" . self::Input($_POST['text']) . "', 
-                           `time`='" . self::realtime() . "'");
+                    `$ref`='" . $refid . "', 
+                        `id_user`='" . $user . "', 
+                           `text`='" . self::Input($_POST['text']) . "', 
+                               `time`='" . self::realtime() . "'");
                 }
 
                 self::antiflood(); //антифлуд
+                
+                //уведомление
+                if ($row['id_user'] != $user && $type == 'blog' && $row['blog'] == 1) {
+                    Cms::notice($row['id_user'], User::$user['id'], 'Оставил комментарий: ' . $_POST['text'] . ' [b]к вашему посту [url=' . Cms::setup('home') . '/blogs/comments/' . $row['id'] . ']' . Functions::esc($row['name']) . '[/url][/b]');
+                }
+
+                if ($row['id_user'] != $user && $type == 'files' && $row['files'] == 1) {
+                    Cms::notice($row['id_user'], User::$user['id'], 'Оставил комментарий: ' . $_POST['text'] . ' [b]к вашему файлу [url=' . Cms::setup('home') . '/download/comments/' . $row['id'] . ']' . Functions::esc($row['name']) . '[/url][/b]');
+                }
+
+                if ($row['id_user'] != $user && $type == 'library' && $row['library'] == 1) {
+                    Cms::notice($row['id_user'], User::$user['id'], 'Оставил комментарий: ' . $_POST['text'] . ' [b]к вашей статье [url=' . Cms::setup('home') . '/library/comments/' . $row['id'] . ']' . Functions::esc($row['name']) . '[/url][/b]');
+                }
 
                 Functions::redirect(self::setup('home') . '/' . $url);
             }

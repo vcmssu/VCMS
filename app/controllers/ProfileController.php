@@ -52,6 +52,12 @@ class ProfileController {
         $this->model->setup();
         Cms::footer();
     }
+    
+    function setup_notice() {
+        Cms::header('Настройка уведомлений');
+        $this->model->setup_notice();
+        Cms::footer();
+    }
 
     function security() {
         Cms::header('Настройки безопасности');

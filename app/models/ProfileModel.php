@@ -308,7 +308,6 @@ class ProfileModel extends Base {
     }
 
     function setup() {
-
         if ($_POST['ok']) {
 
             if (Cms::Input($_POST['message']) < 5 || Cms::Input($_POST['message']) > 100) {
@@ -321,9 +320,9 @@ class ProfileModel extends Base {
 
             if (!isset($error)) {
                 DB::run("UPDATE `users` SET 
-                `news_send`='" . Cms::Int(Cms::Input($_POST['news_send'])) . "', 
+                `news_send`='" . Cms::Int($_POST['news_send']) . "', 
                     `skin` = '" . Cms::Input($_POST['skin']) . "', 
-                       `message`='" . Cms::Int(Cms::Input($_POST['message'])) . "', 
+                       `message`='" . Cms::Int($_POST['message']) . "', 
                            `timezone`='" . Cms::Input($_POST['timezone']) . "' WHERE `id`='" . $this->user['id'] . "'");
 
                 Functions::redirect(Cms::setup('home') . '/profile/setup');
@@ -349,6 +348,19 @@ class ProfileModel extends Base {
             'arrayrowskin' => $arrayrowskin
         ));
         SmartySingleton::instance()->display(SMARTY_TEMPLATE_LOAD . '/templates/modules/profile/setup.tpl');
+    }
+    
+    function setup_notice() {
+        if ($_POST['ok']) {
+                DB::run("UPDATE `users` SET 
+                `notice_blog`='" . Cms::Int($_POST['notice_blog']) . "', 
+                    `notice_files` = '" . Cms::Int($_POST['notice_files']) . "', 
+                       `notice_library`='" . Cms::Int($_POST['notice_library']) . "' WHERE `id`='" . $this->user['id'] . "'");
+
+                Functions::redirect(Cms::setup('home') . '/profile/setup/notice');
+        }
+        
+        SmartySingleton::instance()->display(SMARTY_TEMPLATE_LOAD . '/templates/modules/profile/setup_notice.tpl');
     }
 
     function security() {
@@ -677,6 +689,10 @@ class ProfileModel extends Base {
             if (mb_strlen(Cms::Input($_POST['name'])) < 5 || mb_strlen(Cms::Input($_POST['name'])) > 100000) {
                 $error .= 'Недопустимая длина содержания поста!<br/>';
             }
+            
+            if (DB::run("SELECT COUNT(*) FROM `blog_category` WHERE `id`='" . Cms::Int($_POST['refid']) . "'")->fetchColumn() == 0) {
+                $error .= 'Такой категории не существует!<br/>';
+            }
 
             if (!isset($error)) {
                 DB::run("INSERT INTO `blog` SET 
@@ -713,6 +729,10 @@ class ProfileModel extends Base {
 
             if (mb_strlen(Cms::Input($_POST['name'])) < 5 || mb_strlen(Cms::Input($_POST['name'])) > 100000) {
                 $error .= 'Недопустимая длина содержания поста!<br/>';
+            }
+            
+            if (DB::run("SELECT COUNT(*) FROM `blog_category` WHERE `id`='" . Cms::Int($_POST['refid']) . "'")->fetchColumn() == 0) {
+                $error .= 'Такой категории не существует!<br/>';
             }
 
             if (!isset($error)) {

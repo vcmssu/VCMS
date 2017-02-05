@@ -7,16 +7,16 @@ class User {
     public static function auth() {
         /* Авторизация */
         if (isset($_COOKIE['id_user']) && isset($_COOKIE['hashcode']) && $_COOKIE['id_user'] != NULL && $_COOKIE['hashcode'] != NULL) {
-            $userdata = DB::run("SELECT * FROM `users` WHERE `id` = " . abs(intval($_COOKIE['id_user'])) . " AND `hashcode` = '" . Cms::Input($_COOKIE['hashcode']) . "' LIMIT 1")->fetch(PDO::FETCH_ASSOC);
+            $userdata = DB::run("SELECT * FROM `users` WHERE `id` = " . Cms::Int($_COOKIE['id_user']) . " AND `hashcode` = '" . Cms::Input($_COOKIE['hashcode']) . "' LIMIT 1")->fetch(PDO::FETCH_ASSOC);
             if ($userdata['id']) {
                 /* записываем последнее посещение */
-                DB::run("UPDATE `users` SET `date_last`='" . Cms::realtime() . "' WHERE `id`='" . $userdata['id'] . "'");
+                DB::run("UPDATE LOW_PRIORITY `users` SET `date_last`='" . Cms::realtime() . "' WHERE `id`='" . $userdata['id'] . "'");
 
                 /* онлайн */
                 if (DB::run("SELECT COUNT(*) FROM `online` WHERE `id_user`='" . $userdata['id'] . "'")->fetchColumn() > 0) {
-                    DB::run("UPDATE `online` SET `time`='" . Cms::realtime() . "', `referer`='" . Cms::Input(Cms::setup('home') . '' . Functions::GET_PATH_INFO()) . "' WHERE `id_user`='" . $userdata['id'] . "'");
+                    DB::run("UPDATE LOW_PRIORITY `online` SET `time`='" . Cms::realtime() . "', `referer`='" . Cms::Input(Cms::setup('home') . '' . Functions::GET_PATH_INFO()) . "' WHERE `id_user`='" . $userdata['id'] . "'");
                 } else {
-                    DB::run("INSERT INTO `online` SET 
+                    DB::run("INSERT INTO LOW_PRIORITY `online` SET 
                        `id_user`='" . $userdata['id'] . "', 
                            `ip`='" . Recipe::getClientIP() . "', 
                                 `browser`='" . Recipe::getBrowser() . "',
@@ -37,9 +37,9 @@ class User {
             session_destroy();
             /* онлайн для гостей */
             if (DB::run("SELECT COUNT(*) FROM `online` WHERE `ip`='" . Recipe::getClientIP() . "' AND `type` = '2'")->fetchColumn() > 0) {
-                DB::run("UPDATE `online` SET `time`='" . Cms::realtime() . "', `referer`='" . Cms::Input(Cms::setup('home') . '' . Functions::GET_PATH_INFO()) . "' WHERE `ip`='" . Recipe::getClientIP() . "' AND `type` = '2'");
+                DB::run("UPDATE LOW_PRIORITY `online` SET `time`='" . Cms::realtime() . "', `referer`='" . Cms::Input(Cms::setup('home') . '' . Functions::GET_PATH_INFO()) . "' WHERE `ip`='" . Recipe::getClientIP() . "' AND `type` = '2'");
             } else {
-                DB::run("INSERT INTO `online` SET 
+                DB::run("INSERT INTO LOW_PRIORITY `online` SET 
                            `ip`='" . Recipe::getClientIP() . "', 
                                 `browser`='" . Recipe::getBrowser() . "',
                                     `referer`='" . Cms::Input(Cms::setup('home') . '' . Functions::GET_PATH_INFO()) . "',
